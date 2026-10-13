@@ -14,12 +14,16 @@ const commit = (next: Vaga[]) => {
   AsyncStorage.setItem(KEY, JSON.stringify(next));
 };
 
-AsyncStorage.getItem(KEY).then((v) => {
-  if (v) {
-    vagas = JSON.parse(v);
-    listeners.forEach((l) => l());
-  }
-});
+// Expo Router renders routes on the server for web; AsyncStorage's web
+// implementation needs `window`, so only hydrate when running in a client.
+if (typeof window !== 'undefined') {
+  AsyncStorage.getItem(KEY).then((v) => {
+    if (v) {
+      vagas = JSON.parse(v);
+      listeners.forEach((l) => l());
+    }
+  });
+}
 
 const subscribe = (l: () => void) => {
   listeners.add(l);
