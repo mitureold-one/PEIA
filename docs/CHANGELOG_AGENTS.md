@@ -26,6 +26,26 @@ Este documento é o **registro oficial e mandatório** de todas as mudanças imp
 
 ## Histórico de Mudanças
 
+### [2026-10-16] - Restauração de assets e configuração de build APK
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** O usuário precisava gerar um APK autônomo para apresentação sem servidor local, mas os ícones padrão haviam sido apagados e impediam a validação do build.
+- **Arquivos Alterados / Criados:**
+  - `assets/images/icon.png` (Criado)
+  - `assets/images/android-icon-foreground.png` (Criado)
+  - `assets/images/android-icon-background.png` (Criado)
+  - `assets/images/android-icon-monochrome.png` (Criado)
+  - `assets/images/splash-icon.png` (Criado)
+  - `assets/images/favicon.png` (Criado)
+  - `scripts/generate-icons.ps1` (Criado)
+  - `app.json` (Modificado)
+  - `eas.json` (Modificado)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - Geração dos arquivos de ícones adaptativos e splash screen com a identidade visual do PEIA.
+  - Correção do caminho `ios.icon` em `app.json`.
+  - Configuração do perfil `preview` em `eas.json` com `buildType: "apk"` para distribuição interna direta.
+- **Impactos & Observações:** O comando `npx expo config --type public` agora valida sem erros. Pronto para execução do EAS Build.
+
 ### [2026-10-13] - Adiciona leitura de currículos em PDF na web
 - **Agente / Autor:** Codex
 - **Motivação / Contexto:** O usuário solicitou suporte a arquivos PDF no fluxo de leitura de currículo.
