@@ -1,14 +1,28 @@
-import type { ColorValue } from 'react-native';
+import { Text, View, type ColorValue } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { Tabs, useRouter } from 'expo-router';
 import { useColorScheme } from 'nativewind';
+import { Button } from '@/components/ui/button';
 import { HomeHeader } from '@/components/home/home-header';
 import { ROUTES } from '@/constants/routes';
+import { perfilActions } from '@/hooks/use-perfil';
+
+export function ErrorBoundary({ error, retry }: { error: Error; retry: () => void }) {
+  return (
+    <View className="flex-1 items-center justify-center p-6 bg-slate-50 dark:bg-[#03031b]">
+      <View className="max-w-md w-full p-6 bg-white dark:bg-slate-900 rounded-2xl border border-rose-200 dark:border-rose-900/50 shadow-lg">
+        <Text className="text-xl font-bold text-rose-600 dark:text-rose-400 mb-2">Erro ao carregar o Feed</Text>
+        <Text className="text-sm text-slate-700 dark:text-slate-300 mb-4">{error?.message || 'Erro inesperado.'}</Text>
+        <Button title="Tentar novamente" onPress={retry} />
+      </View>
+    </View>
+  );
+}
 
 type IconName = keyof typeof Ionicons.glyphMap;
 
 const icon = (name: IconName) =>
-  function TabIcon({ color, size }: { color: ColorValue; size: number }) {
+  function TabIcon({ color, size }: { color: any; size: number }) {
     return <Ionicons name={name} color={color} size={size} />;
   };
 
@@ -37,6 +51,7 @@ export default function HomeLayout() {
         listeners={{
           tabPress: (e) => {
             e.preventDefault();
+            perfilActions.excluir();
             router.replace(ROUTES.AUTH);
           },
         }}

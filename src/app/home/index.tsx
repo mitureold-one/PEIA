@@ -105,7 +105,7 @@ export default function Feed() {
             </Text>
             <Text numberOfLines={2} className="text-sm text-slate-600 dark:text-slate-400">{item.descricao}</Text>
             <Text className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-              {item.area} · {item.modalidade} · R$ {item.bolsa.toLocaleString('pt-BR')}
+              {item.area} · {item.modalidade} · R$ {item.bolsa}
               {item.arquivada ? ' · Arquivada' : ''}
             </Text>
           </Pressable>

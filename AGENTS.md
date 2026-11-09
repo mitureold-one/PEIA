@@ -1,8 +1,8 @@
 # Diretrizes para Agentes de IA - Projeto PEIA
 
-## 1. Expo 57 Obrigatório
+## 1. Expo 58 Obrigatório
 > **Expo HAS CHANGED:** Leia a documentação exata da versão antes de escrever qualquer código:  
-> https://docs.expo.dev/versions/v57.0.0/
+> https://docs.expo.dev/versions/v58.0.0/
 
 ---
 

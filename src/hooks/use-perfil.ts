@@ -1,5 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSyncExternalStore } from 'react';
+import { Platform } from 'react-native';
+import type { UserRole } from '@/data/user';
 
 const KEY = 'peia:perfil';
 
@@ -8,6 +10,7 @@ export interface Perfil {
   surname: string;
   email: string;
   phone: string;
+  role?: UserRole;
   excluidoEm?: string;
 }
 
@@ -18,16 +21,23 @@ const listeners = new Set<() => void>();
 const commit = (next: Perfil | null) => {
   perfil = next;
   listeners.forEach((l) => l());
-  AsyncStorage.setItem(KEY, JSON.stringify(next));
+  AsyncStorage.setItem(KEY, JSON.stringify(next)).catch(() => {});
 };
 
-// Expo Router renders routes on the server for web; AsyncStorage's web
-// implementation needs `window`, so only hydrate when running in a client.
-if (typeof window !== 'undefined') {
-  AsyncStorage.getItem(KEY).then((v) => {
-    perfil = v ? JSON.parse(v) : null;
-    listeners.forEach((l) => l());
-  });
+// Evita execução durante SSR no Node (web) e hidrata no cliente e no app nativo.
+if (Platform.OS !== 'web' || typeof window !== 'undefined') {
+  AsyncStorage.getItem(KEY)
+    .then((v) => {
+      if (v) {
+        try {
+          perfil = JSON.parse(v);
+          listeners.forEach((l) => l());
+        } catch {
+          // formato inválido ignorado
+        }
+      }
+    })
+    .catch(() => {});
 }
 
 const subscribe = (l: () => void) => {
@@ -36,6 +46,7 @@ const subscribe = (l: () => void) => {
 };
 
 export const perfilActions = {
+  obter: () => (perfil && !perfil.excluidoEm ? perfil : null),
   criar: (dados: Omit<Perfil, 'excluidoEm'>) => commit(dados),
   editar: (dados: Omit<Perfil, 'excluidoEm'>) => commit({ ...dados }),
   // Soft delete: mantém o registro, só marca a data de exclusão.

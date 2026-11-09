@@ -1,7 +1,8 @@
 import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { ROUTES } from '@/constants/routes';
-import { perfilActions } from '@/hooks/use-perfil';
+import { useAuth } from '@/hooks/use-auth';
+import type { UserRole } from '@/data/user';
 import type { AlertState } from '@/components/ui/alert-modal';
 import {
   formatPhone,
@@ -15,14 +16,23 @@ export interface FormErrors {
   surname?: string;
   registerEmail?: string;
   registerPhone?: string;
+  registerPassword?: string;
   loginEmail?: string;
   loginPassword?: string;
 }
 
+/**
+ * Hook exclusivo para controle de formulário da tela de autenticação (UI / Form Controller).
+ * Responsabilidade: gerenciar estados de campos, formatação e validação visual de entradas.
+ * As operações de domínio e persistência são delegadas para o hook `useAuth`.
+ */
 export function useAuthForm(isSignUp: boolean) {
   const router = useRouter();
+  const auth = useAuth();
+
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
   const [alert, setAlert] = useState<AlertState>({
     visible: false,
@@ -31,11 +41,15 @@ export function useAuthForm(isSignUp: boolean) {
     message: '',
   });
 
+  const [onAlertCloseCallback, setOnAlertCloseCallback] = useState<(() => void) | null>(null);
+
   // Estados de Cadastro
+  const [role, setRole] = useState<UserRole>('aluno');
   const [name, setName] = useState('');
   const [surname, setSurname] = useState('');
   const [registerEmail, setRegisterEmail] = useState('');
   const [registerPhone, setRegisterPhone] = useState('');
+  const [registerPassword, setRegisterPassword] = useState('');
 
   // Estados de Login
   const [loginEmail, setLoginEmail] = useState('');
@@ -68,6 +82,11 @@ export function useAuthForm(isSignUp: boolean) {
     clearFieldError('registerPhone');
   };
 
+  const handleRegisterPasswordChange = (val: string) => {
+    setRegisterPassword(val);
+    clearFieldError('registerPassword');
+  };
+
   const handleLoginEmailChange = (val: string) => {
     setLoginEmail(val);
     clearFieldError('loginEmail');
@@ -79,6 +98,7 @@ export function useAuthForm(isSignUp: boolean) {
   };
 
   const toggleShowPassword = () => setShowPassword((prev) => !prev);
+  const toggleShowRegisterPassword = () => setShowRegisterPassword((prev) => !prev);
 
   const validateSignUp = (): boolean => {
     const newErrors: FormErrors = {};
@@ -91,9 +111,10 @@ export function useAuthForm(isSignUp: boolean) {
       newErrors.surname = 'Sobrenome é obrigatório.';
     }
 
-    if (!validateRequired(registerEmail)) {
+    const cleanEmail = registerEmail.trim();
+    if (!validateRequired(cleanEmail)) {
       newErrors.registerEmail = 'E-mail é obrigatório.';
-    } else if (!validateEmail(registerEmail)) {
+    } else if (!validateEmail(cleanEmail)) {
       newErrors.registerEmail = 'Informe um e-mail com domínio válido.';
     }
 
@@ -103,62 +124,98 @@ export function useAuthForm(isSignUp: boolean) {
       newErrors.registerPhone = 'Informe um telefone válido com DDD.';
     }
 
+    if (!validateRequired(registerPassword)) {
+      newErrors.registerPassword = 'Senha é obrigatória.';
+    } else if (registerPassword.length < 6) {
+      newErrors.registerPassword = 'A senha deve ter pelo menos 6 caracteres.';
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const validateLogin = (): boolean => {
     const newErrors: FormErrors = {};
+    const cleanEmail = loginEmail.trim();
 
-    if (!validateRequired(loginEmail)) {
+    if (!validateRequired(cleanEmail)) {
       newErrors.loginEmail = 'E-mail é obrigatório.';
-    } else if (!validateEmail(loginEmail)) {
+    } else if (!validateEmail(cleanEmail)) {
       newErrors.loginEmail = 'Informe um e-mail com domínio válido.';
     }
 
     if (!validateRequired(loginPassword)) {
       newErrors.loginPassword = 'Senha é obrigatória.';
-    } else if (loginPassword.length < 6) {
-      newErrors.loginPassword = 'A senha deve ter no mínimo 6 caracteres.';
+    } else if (loginPassword.length < 4) {
+      newErrors.loginPassword = 'A senha deve ter no mínimo 4 caracteres.';
     }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
-  const showAlert = (variant: AlertState['variant'], title: string, message: string) =>
+  const showAlert = (
+    variant: AlertState['variant'],
+    title: string,
+    message: string,
+    onCloseCallback?: () => void
+  ) => {
+    setOnAlertCloseCallback(() => onCloseCallback ?? null);
     setAlert({ visible: true, variant, title, message });
-  const closeAlert = () => setAlert((prev) => ({ ...prev, visible: false }));
+  };
+
+  const closeAlert = () => {
+    setAlert((prev) => ({ ...prev, visible: false }));
+    if (onAlertCloseCallback) {
+      const cb = onAlertCloseCallback;
+      setOnAlertCloseCallback(null);
+      cb();
+    }
+  };
 
   const handleSubmit = async () => {
     if (isSignUp) {
       if (!validateSignUp()) {
-        showAlert('error', 'Campos inválidos', 'Por favor, corrija os erros destacados no formulário.');
         return;
       }
 
       setLoading(true);
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-        perfilActions.criar({ name, surname, email: registerEmail, phone: registerPhone });
-        showAlert('success', 'Cadastro realizado!', `Bem-vindo(a) ao PEIA, ${name}!`);
-      } catch {
-        showAlert('error', 'Erro', 'Não foi possível concluir o cadastro. Tente novamente.');
+        const savedUser = await auth.signUp({
+          name: name.trim(),
+          surname: surname.trim(),
+          email: registerEmail.trim(),
+          phone: registerPhone.trim(),
+          password: registerPassword,
+          role,
+        });
+
+        showAlert(
+          'success',
+          'Conta criada!',
+          `Bem-vindo(a) ao PEIA, ${savedUser.name}! Seu cadastro foi salvo no banco local.`,
+          () => {
+            router.replace(ROUTES.HOME);
+          }
+        );
+      } catch (err: any) {
+        const errorMsg = err?.message || 'Não foi possível concluir o cadastro. Tente novamente.';
+        showAlert('error', 'Erro no cadastro', errorMsg);
       } finally {
         setLoading(false);
       }
     } else {
       if (!validateLogin()) {
-        showAlert('error', 'Campos inválidos', 'Por favor, corrija os erros destacados no formulário.');
         return;
       }
 
       setLoading(true);
       try {
-        await new Promise((resolve) => setTimeout(resolve, 1500));
+        await auth.signIn(loginEmail, loginPassword);
         router.replace(ROUTES.HOME);
-      } catch {
-        showAlert('error', 'Erro', 'Não foi possível realizar o login. Verifique seus dados.');
+      } catch (err: any) {
+        const errorMsg = err?.message || 'Falha ao autenticar. Tente novamente.';
+        showAlert('error', 'Erro no login', errorMsg);
       } finally {
         setLoading(false);
       }
@@ -166,27 +223,33 @@ export function useAuthForm(isSignUp: boolean) {
   };
 
   return {
-    loading,
+    loading: loading || auth.loading,
     showPassword,
+    showRegisterPassword,
     toggleShowPassword,
+    toggleShowRegisterPassword,
     errors,
     alert,
     closeAlert,
-    // Cadastro
+    // Campos de Cadastro
+    role,
+    setRole,
     name,
     surname,
     registerEmail,
     registerPhone,
+    registerPassword,
     setName: handleNameChange,
     setSurname: handleSurnameChange,
     setRegisterEmail: handleRegisterEmailChange,
     setRegisterPhone: handleRegisterPhoneChange,
-    // Login
+    setRegisterPassword: handleRegisterPasswordChange,
+    // Campos de Login
     loginEmail,
     loginPassword,
     setLoginEmail: handleLoginEmailChange,
     setLoginPassword: handleLoginPasswordChange,
-    // Ações
+    // Ação do formulário
     handleSubmit,
   };
 }

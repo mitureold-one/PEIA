@@ -76,10 +76,44 @@ export default function Profile() {
   return (
     <SafeAreaView edges={[]} className="flex-1 bg-slate-50 dark:bg-[#03031b]">
       <ScrollView contentContainerClassName="gap-4 p-6" keyboardShouldPersistTaps="handled">
-        <Text className="text-2xl font-bold text-slate-900 dark:text-white">Meu perfil</Text>
+        <View className="flex-row items-center justify-between">
+          <Text className="text-2xl font-bold text-slate-900 dark:text-white">Meu perfil</Text>
+          {perfil?.role && (
+            <View className="px-2.5 py-1 rounded-full bg-indigo-100 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800">
+              <Text className="text-xs font-semibold text-indigo-700 dark:text-indigo-300">
+                {perfil.role === 'superadmin'
+                  ? 'Super Admin'
+                  : perfil.role === 'admin'
+                  ? 'Administrador'
+                  : perfil.role === 'empresa'
+                  ? 'Empresa'
+                  : 'Aluno'}
+              </Text>
+            </View>
+          )}
+        </View>
         <Text className="text-sm text-slate-500 dark:text-slate-400">
           Atualize seus dados e monte seu currículo. Tudo fica salvo neste aparelho.
         </Text>
+
+        {/* Painel Administrativo de Gestão (visível apenas para Admin e Super Admin) */}
+        {(perfil?.role === 'admin' || perfil?.role === 'superadmin') && (
+          <View className="p-4 rounded-2xl bg-indigo-50 border border-indigo-200 dark:bg-indigo-950/40 dark:border-indigo-900/60 my-1">
+            <View className="flex-row items-center gap-2 mb-1">
+              <Text className="text-base">🛡️</Text>
+              <Text className="font-bold text-slate-900 dark:text-white">
+                Painel de Gestão de Usuários
+              </Text>
+            </View>
+            <Text className="text-xs text-slate-600 dark:text-slate-300 mb-3">
+              Como {perfil.role === 'superadmin' ? 'Super Administrador' : 'Administrador'}, você tem permissão para cadastrar novas empresas e gerenciar perfis no SQLite.
+            </Text>
+            <Button
+              title="Acessar Cadastro Interno"
+              onPress={() => router.push(ROUTES.GESTAO_USUARIOS as any)}
+            />
+          </View>
+        )}
 
         <Text className="mt-2 text-base font-semibold text-slate-900 dark:text-white">Dados pessoais</Text>
         <Input label="Nome" value={dados.name} onChangeText={setD('name')} errorMessage={errors.name} />

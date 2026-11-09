@@ -17,18 +17,24 @@ export function AuthForm({ isSignUp }: AuthFormProps) {
   const {
     loading,
     showPassword,
+    showRegisterPassword,
     toggleShowPassword,
+    toggleShowRegisterPassword,
     errors,
     alert,
     closeAlert,
+    role,
+    setRole,
     name,
     surname,
     registerEmail,
     registerPhone,
+    registerPassword,
     setName,
     setSurname,
     setRegisterEmail,
     setRegisterPhone,
+    setRegisterPassword,
     loginEmail,
     loginPassword,
     setLoginEmail,
@@ -45,13 +51,13 @@ export function AuthForm({ isSignUp }: AuthFormProps) {
       <View className="mb-5 pb-4 border-b border-slate-100 dark:border-slate-800/80">
         <View className="flex-row items-center gap-2 mb-1">
           <Text className="text-base font-bold text-slate-900 dark:text-white">
-            {isSignUp ? 'Criar sua Conta' : 'Acessar Plataforma'}
+            {isSignUp ? 'Criar Conta de Estudante' : 'Acessar Plataforma'}
           </Text>
         </View>
         <Text className="text-xs text-slate-500 dark:text-slate-400">
           {isSignUp
-            ? 'Preencha seus dados para iniciar a sua jornada.'
-            : 'Entre com suas credenciais institucionais.'}
+            ? 'Preencha seus dados para iniciar a sua jornada no PEIA.'
+            : 'Entre com suas credenciais institucionais ou corporativas.'}
         </Text>
       </View>
 
@@ -109,6 +115,32 @@ export function AuthForm({ isSignUp }: AuthFormProps) {
             leftIcon={<Ionicons name="call-outline" size={18} color={iconColor} />}
           />
 
+          <Input
+            key="signup-password"
+            label="Senha"
+            required
+            value={registerPassword}
+            onChangeText={setRegisterPassword}
+            placeholder="Mínimo de 6 caracteres"
+            secureTextEntry={!showRegisterPassword}
+            autoCapitalize="none"
+            isLoading={loading}
+            errorMessage={errors.registerPassword}
+            leftIcon={<Ionicons name="lock-closed-outline" size={18} color={iconColor} />}
+            rightIcon={
+              <TouchableOpacity
+                onPress={toggleShowRegisterPassword}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              >
+                <Ionicons
+                  name={showRegisterPassword ? 'eye-off-outline' : 'eye-outline'}
+                  size={18}
+                  color={colorScheme === 'dark' ? '#94a3b8' : '#64748b'}
+                />
+              </TouchableOpacity>
+            }
+          />
+
           <Button
             key="signup-button"
             title="Criar Conta"
@@ -127,7 +159,7 @@ export function AuthForm({ isSignUp }: AuthFormProps) {
             required
             value={loginEmail}
             onChangeText={setLoginEmail}
-            placeholder="002-*****@aluno.undb.edu.com"
+            placeholder="aluno@undb.edu.br"
             keyboardType="email-address"
             autoCapitalize="none"
             autoCorrect={false}
@@ -171,6 +203,58 @@ export function AuthForm({ isSignUp }: AuthFormProps) {
             icon={<Ionicons name="log-in-outline" size={19} color="#ffffff" />}
             className="mt-2"
           />
+
+          {/* Demonstração / Atalhos Rápidos de Login */}
+          <View className="mt-2 pt-4 border-t border-slate-100 dark:border-slate-800">
+            <Text className="text-[11px] font-bold text-slate-400 dark:text-slate-500 mb-2.5 uppercase tracking-wider">
+              Acesso Rápido para Apresentação:
+            </Text>
+            <View className="flex-row flex-wrap gap-2">
+              <TouchableOpacity
+                onPress={() => {
+                  setLoginEmail('john.doe@aluno.undb.edu.br');
+                  setLoginPassword('password123');
+                }}
+                className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex-row items-center gap-1.5 active:opacity-70"
+              >
+                <Text className="text-xs"></Text>
+                <Text className="text-xs font-semibold text-slate-700 dark:text-slate-200">Aluno</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => {
+                  setLoginEmail('recrutamento@techcorp.com.br');
+                  setLoginPassword('password123');
+                }}
+                className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex-row items-center gap-1.5 active:opacity-70"
+              >
+
+                <Text className="text-xs font-semibold text-slate-700 dark:text-slate-200">Empresa</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => {
+                  setLoginEmail('admin@undb.edu.br');
+                  setLoginPassword('password123');
+                }}
+                className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex-row items-center gap-1.5 active:opacity-70"
+              >
+
+                <Text className="text-xs font-semibold text-slate-700 dark:text-slate-200">Admin</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => {
+                  setLoginEmail('root@peia.edu.br');
+                  setLoginPassword('password123');
+                }}
+                className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex-row items-center gap-1.5 active:opacity-70"
+              >
+
+                <Text className="text-xs font-semibold text-slate-700 dark:text-slate-200">Super Admin</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
         </View>
       )}
 
