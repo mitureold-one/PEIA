@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useRouter } from 'expo-router';
 import { ROUTES } from '@/constants/routes';
 import { perfilActions } from '@/hooks/use-perfil';
+import { userRoleActions, useUserRole } from '@/hooks/use-user-role';
 import type { AlertState } from '@/components/ui/alert-modal';
 import {
   formatPhone,
@@ -40,6 +41,7 @@ export function useAuthForm(isSignUp: boolean) {
   // Estados de Login
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+  const userRole = useUserRole();
 
   const clearFieldError = (field: keyof FormErrors) => {
     if (errors[field]) {
@@ -140,6 +142,7 @@ export function useAuthForm(isSignUp: boolean) {
       setLoading(true);
       try {
         await new Promise((resolve) => setTimeout(resolve, 1500));
+        userRoleActions.definir(userRole);
         perfilActions.criar({ name, surname, email: registerEmail, phone: registerPhone });
         showAlert('success', 'Cadastro realizado!', `Bem-vindo(a) ao PEIA, ${name}!`);
       } catch {
@@ -156,6 +159,7 @@ export function useAuthForm(isSignUp: boolean) {
       setLoading(true);
       try {
         await new Promise((resolve) => setTimeout(resolve, 1500));
+        userRoleActions.definir(userRole);
         router.replace(ROUTES.HOME);
       } catch {
         showAlert('error', 'Erro', 'Não foi possível realizar o login. Verifique seus dados.');
@@ -184,6 +188,8 @@ export function useAuthForm(isSignUp: boolean) {
     // Login
     loginEmail,
     loginPassword,
+    userRole,
+    setUserRole: userRoleActions.definir,
     setLoginEmail: handleLoginEmailChange,
     setLoginPassword: handleLoginPasswordChange,
     // Ações

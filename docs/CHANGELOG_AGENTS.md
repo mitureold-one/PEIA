@@ -26,6 +26,56 @@ Este documento é o **registro oficial e mandatório** de todas as mudanças imp
 
 ## Histórico de Mudanças
 
+### [2026-11-09] - Prioriza funções por tipo de usuário
+- **Agente / Autor:** Codex
+- **Motivação / Contexto:** Ajuste solicitado para destacar em cada perfil as tarefas próprias de estudante, empresa e coordenação.
+- **Arquivos Alterados / Criados:**
+  - `src/app/home/_layout.tsx` (Modificado)
+  - `src/app/home/index.tsx` (Modificado)
+  - `src/app/home/profile.tsx` (Modificado)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+  - `docs/ARCHITECTURE.md` (Modificado)
+- **Principais Mudanças:**
+  - O perfil estudante destaca busca de estágio, currículo e inscrições realizadas.
+  - Conta de empresa e coordenação não exibe campos de currículo; empresa vê orientação de publicação e coordenação abre inicialmente o cadastro de empresas.
+  - Abas e títulos do feed e da conta acompanham o papel selecionado.
+- **Impactos & Observações:** Os fluxos continuam usando dados locais do protótipo.
+
+### [2026-11-09] - Separa permissões por tipo de usuário
+- **Agente / Autor:** Codex
+- **Motivação / Contexto:** O fluxo de vagas precisava diferenciar empresa, estudante e coordenação na interface.
+- **Arquivos Alterados / Criados:**
+  - `src/hooks/use-user-role.ts` (Criado)
+  - `src/hooks/use-empresas.ts` (Criado)
+  - `src/hooks/use-inscricoes.ts` (Criado)
+  - `src/components/auth/auth-form.tsx` (Modificado)
+  - `src/hooks/use-auth-form.ts` (Modificado)
+  - `src/app/home/_layout.tsx` (Modificado)
+  - `src/app/home/index.tsx` (Modificado)
+  - `src/app/home/companies.tsx` (Criado)
+  - `src/app/vaga/[id].tsx` (Modificado)
+  - `src/app/vaga/form.tsx` (Modificado)
+  - `docs/ARCHITECTURE.md` (Modificado)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - Login e cadastro permitem selecionar o perfil de demonstração; a escolha fica salva localmente.
+  - Empresas podem publicar novas vagas, sem controles para editar, arquivar ou excluir anúncios existentes; estudantes podem registrar inscrição local.
+  - Coordenação recebe uma aba para cadastrar empresas, com nome e e-mail salvos no dispositivo.
+- **Impactos & Observações:** A autorização e os cadastros são apenas de interface e persistência local. Não substituem autenticação ou autorização no servidor, que ainda não existe no projeto.
+
+### [2026-11-09] - Limita empresa à publicação de vagas
+- **Agente / Autor:** Codex
+- **Motivação / Contexto:** Esclarecimento de que o perfil empresa pode somente anunciar vagas.
+- **Arquivos Alterados / Criados:**
+  - `src/app/vaga/[id].tsx` (Modificado)
+  - `src/app/vaga/form.tsx` (Modificado)
+  - `docs/ARCHITECTURE.md` (Modificado)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - Removidas as ações de edição, arquivamento e exclusão de vaga para empresas.
+  - A rota do formulário aceita apenas novas publicações; tentativa de abrir edição mostra orientação.
+- **Impactos & Observações:** Empresas seguem limitadas à publicação de novas vagas no protótipo.
+
 ### [2026-10-13] - Adiciona leitura de currículos em PDF na web
 - **Agente / Autor:** Codex
 - **Motivação / Contexto:** O usuário solicitou suporte a arquivos PDF no fluxo de leitura de currículo.

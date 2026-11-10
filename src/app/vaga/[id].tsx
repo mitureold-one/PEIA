@@ -1,12 +1,15 @@
 import { Alert, ScrollView, Text, View } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useLocalSearchParams } from 'expo-router';
 import { Button } from '@/components/ui/button';
-import { useVagas, vagasActions } from '@/hooks/use-vagas';
+import { useVagas } from '@/hooks/use-vagas';
+import { useUserRole } from '@/hooks/use-user-role';
+import { inscricoesActions, useInscricoes } from '@/hooks/use-inscricoes';
 
 export default function VagaDetalhe() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const router = useRouter();
   const vaga = useVagas().find((v) => v.id === id);
+  const role = useUserRole();
+  const inscricoes = useInscricoes();
 
   if (!vaga) {
     return (
@@ -15,19 +18,6 @@ export default function VagaDetalhe() {
       </View>
     );
   }
-
-  const confirmarExclusao = () =>
-    Alert.alert('Excluir vaga', 'Deseja excluir esta vaga?', [
-      { text: 'Cancelar', style: 'cancel' },
-      {
-        text: 'Excluir',
-        style: 'destructive',
-        onPress: () => {
-          vagasActions.excluir(vaga.id);
-          router.back();
-        },
-      },
-    ]);
 
   const info = [
     ['Área', vaga.area],
@@ -63,13 +53,16 @@ export default function VagaDetalhe() {
         <Text className="text-sm leading-relaxed text-slate-600 dark:text-slate-300">{vaga.descricao}</Text>
       </View>
 
-      <Button title="Editar" onPress={() => router.push({ pathname: '/vaga/form', params: { id: vaga.id } })} />
-      <Button
-        title={vaga.arquivada ? 'Desarquivar' : 'Arquivar'}
-        variant="secondary"
-        onPress={() => vagasActions.arquivar(vaga.id, !vaga.arquivada)}
-      />
-      <Button title="Excluir" className="bg-rose-600 active:bg-rose-700" onPress={confirmarExclusao} />
+      {role === 'estudante' && (
+        <Button
+          title={inscricoes.includes(vaga.id) ? 'Inscrição realizada' : 'Inscrever-se na vaga'}
+          disabled={inscricoes.includes(vaga.id)}
+          onPress={() => {
+            inscricoesActions.inscrever(vaga.id);
+            Alert.alert('Inscrição realizada', 'Sua inscrição foi salva neste dispositivo.');
+          }}
+        />
+      )}
     </ScrollView>
   );
 }

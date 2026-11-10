@@ -4,7 +4,8 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { AREAS, MODALIDADES, type Modalidade } from '@/data/vagas';
-import { useVagas, vagasActions } from '@/hooks/use-vagas';
+import { vagasActions } from '@/hooks/use-vagas';
+import { useUserRole } from '@/hooks/use-user-role';
 
 function Chips<T extends string>({ options, value, onChange }: { options: T[]; value: T; onChange: (v: T) => void }) {
   return (
@@ -32,20 +33,21 @@ function Chips<T extends string>({ options, value, onChange }: { options: T[]; v
 export default function VagaForm() {
   const { id } = useLocalSearchParams<{ id?: string }>();
   const router = useRouter();
-  const existente = useVagas().find((v) => v.id === id);
+  const role = useUserRole();
 
-  const [titulo, setTitulo] = useState(existente?.titulo ?? '');
-  const [empresa, setEmpresa] = useState(existente?.empresa ?? '');
-  const [cidade, setCidade] = useState(existente?.cidade ?? '');
-  const [area, setArea] = useState(existente?.area ?? AREAS[0]);
-  const [modalidade, setModalidade] = useState<Modalidade>(existente?.modalidade ?? MODALIDADES[0]);
-  const [bolsa, setBolsa] = useState(existente ? String(existente.bolsa) : '');
-  const [descricao, setDescricao] = useState(existente?.descricao ?? '');
+  const [titulo, setTitulo] = useState('');
+  const [empresa, setEmpresa] = useState('');
+  const [cidade, setCidade] = useState('');
+  const [area, setArea] = useState(AREAS[0]);
+  const [modalidade, setModalidade] = useState<Modalidade>(MODALIDADES[0]);
+  const [bolsa, setBolsa] = useState('');
+  const [descricao, setDescricao] = useState('');
   const [tentou, setTentou] = useState(false);
 
   const obrigatorio = (v: string) => (tentou && !v.trim() ? 'Campo obrigatório.' : undefined);
 
   const salvar = () => {
+    if (role !== 'empresa' || id) return;
     setTentou(true);
     if (![titulo, empresa, cidade].every((v) => v.trim())) return;
     const dados = {
@@ -56,10 +58,8 @@ export default function VagaForm() {
       modalidade,
       bolsa: Number(bolsa.replace(/\D/g, '')) || 0,
       descricao: descricao.trim(),
-      arquivada: existente?.arquivada,
     };
-    if (existente) vagasActions.editar(existente.id, dados);
-    else vagasActions.criar(dados);
+    vagasActions.criar(dados);
     router.back();
   };
 
@@ -69,7 +69,18 @@ export default function VagaForm() {
       contentContainerClassName="gap-4 p-6"
       keyboardShouldPersistTaps="handled"
     >
-      <Stack.Screen options={{ title: existente ? 'Editar vaga' : 'Nova vaga' }} />
+      <Stack.Screen options={{ title: 'Nova vaga' }} />
+      {role !== 'empresa' || id ? (
+        <View className="gap-3 rounded-2xl border border-amber-300 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/30">
+          <Text className="font-semibold text-amber-800 dark:text-amber-300">
+            {role === 'empresa' ? 'Publicação de vagas' : 'Acesso restrito a empresas'}
+          </Text>
+          <Text className="text-sm text-amber-700 dark:text-amber-400">
+            {role === 'empresa' ? 'Empresas podem anunciar vagas, mas não editar ou remover anúncios existentes.' : 'Somente empresas podem anunciar vagas.'}
+          </Text>
+          <Button title="Voltar para as vagas" onPress={() => router.replace('/home')} />
+        </View>
+      ) : <>
       <Input label="Título" required value={titulo} onChangeText={setTitulo} errorMessage={obrigatorio(titulo)} />
       <Input label="Empresa" required value={empresa} onChangeText={setEmpresa} errorMessage={obrigatorio(empresa)} />
       <Input label="Cidade" required value={cidade} onChangeText={setCidade} errorMessage={obrigatorio(cidade)} />
@@ -90,7 +101,8 @@ export default function VagaForm() {
         textAlignVertical="top"
         className="min-h-[100px]"
       />
-      <Button title={existente ? 'Salvar alterações' : 'Criar vaga'} onPress={salvar} />
+      <Button title="Anunciar vaga" onPress={salvar} />
+      </>}
     </ScrollView>
   );
 }

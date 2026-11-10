@@ -37,6 +37,7 @@ PEIA/
 │   │   │   ├── _layout.tsx    # Configuração da barra inferior de navegação (Tabs)
 │   │   │   ├── index.tsx      # Feed principal com busca e filtros de vagas
 │   │   │   ├── scan.tsx       # Tela de escaneamento de credencial / QR code
+│   │   │   ├── companies.tsx  # Cadastro local de empresas pela coordenação
 │   │   │   ├── profile.tsx    # Tela de visualização e edição de perfil
 │   │   │   └── logout.tsx     # Handler de saída de sessão
 │   │   └── vaga/              # Rotas dinâmicas e formulários de vagas
@@ -55,6 +56,9 @@ PEIA/
 │   ├── hooks/                 # Custom hooks e stores de estado
 │   │   ├── use-vagas.ts       # Store global reativo de vagas com persistência no AsyncStorage
 │   │   ├── use-perfil.ts      # Store global reativo de perfil com persistência no AsyncStorage
+│   │   ├── use-user-role.ts    # Papel do protótipo: empresa, estudante ou coordenação
+│   │   ├── use-empresas.ts     # Empresas cadastradas localmente pela coordenação
+│   │   ├── use-inscricoes.ts   # Inscrições locais de estudantes em vagas
 │   │   ├── use-auth-form.ts   # Lógica e validação do formulário de autenticação
 │   │   ├── use-theme.ts       # Acesso e controle de tema
 │   │   └── use-color-scheme.ts# Wrapper para detecção de tema do sistema
@@ -90,7 +94,15 @@ PEIA/
 - O tema escuro é configurado nativamente com classes prefixadas por `dark:` (ex: `bg-slate-50 dark:bg-[#03031b]`).
 - O estado de tema pode ser alternado via `useColorScheme()` do NativeWind e o componente `ThemeToggle` (`src/components/ui/theme-toggle.tsx`).
 
-### 3.4. Acessibilidade e Boas Práticas
+### 3.4. Papéis no protótipo
+- O papel selecionado no acesso é salvo localmente em `peia:tipo-usuario` e controla as ações visíveis.
+- Empresas podem anunciar novas vagas; estudantes podem se inscrever; coordenação cadastra empresas.
+- Empresas não podem editar, arquivar ou excluir vagas anunciadas.
+- O perfil de estudante reúne currículo e inscrições; empresa e coordenação veem apenas os dados de conta.
+- A aba de empresas é a tela inicial da coordenação.
+- Como o projeto ainda não possui backend de autenticação/autorização, essa separação serve apenas para demonstração no cliente.
+
+### 3.5. Acessibilidade e Boas Práticas
 - Todos os botões e áreas interativas devem incluir `accessibilityRole="button"` e, caso não possuam texto explícito visível, `accessibilityLabel`.
 - Inputs devem possuir rótulos acessíveis e comportamentos previsíveis com `KeyboardAvoidingView` e `keyboardShouldPersistTaps="handled"`.
 
