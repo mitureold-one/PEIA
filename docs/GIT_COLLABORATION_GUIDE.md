@@ -16,7 +16,7 @@ Este guia define as boas práticas e regras operacionais para garantir que múlt
    - Não reordene imports ou reforce formatações em massa que gerem ruído no `git diff`.
 
 3. **Não Sobrescrever Decisões Anteriores:**
-   - Respeite as escolhas arquiteturais documentadas em `docs/ARCHITECTURE.md` (ex: padrão de estado reativo com `useSyncExternalStore` + `AsyncStorage`, uso de NativeWind ao invés de StyleSheet tradicional, etc.).
+   - Respeite as escolhas arquiteturais documentadas em `docs/ARCHITECTURE.md` (ex: padrão de persistência resiliente em SQLite com fallback para AsyncStorage, reatividade com `useSyncExternalStore`, uso de NativeWind ao invés de StyleSheet tradicional, etc.).
 
 ---
 

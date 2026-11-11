@@ -6,16 +6,18 @@ Este documento descreve a arquitetura técnica, convenções de código e a orga
 
 ## 1. Visão Geral do Projeto
 
-O **PEIA** é um aplicativo mobile focado na gestão, busca e publicação de vagas de estágio para estudantes universitários, além de fluxos de autenticação, escaneamento/validação e perfil de usuário.
+O **PEIA** é um aplicativo mobile focado na gestão, busca e publicação de vagas de estágio para estudantes universitários, além de fluxos de autenticação com separação de personas, escaneamento/leitura de currículo via OCR, cadastro de empresas parceiras e painel de gestão de usuários.
 
 ### Stack Tecnológica
-- **Framework Mobile:** [Expo](https://expo.dev) `~57.0.24` (SDK 57)
-- **Runtime:** [React Native](https://reactnative.dev) `0.86.3` / [React](https://react.dev) `19.2.3`
-- **Roteamento:** [Expo Router](https://docs.expo.dev/router/introduction/) `~57.0.22` (Roteamento baseado no sistema de arquivos)
+- **Framework Mobile:** [Expo](https://expo.dev) `~58.0.21` (SDK 58)
+- **Runtime:** [React Native](https://reactnative.dev) `0.88.1` / [React](https://react.dev) `19.3.0`
+- **Roteamento:** [Expo Router](https://docs.expo.dev/router/introduction/) `~58.0.28` (Roteamento baseado no sistema de arquivos)
 - **Estilização:** [NativeWind](https://www.nativewind.dev/) `^4.2.7` + [TailwindCSS](https://tailwindcss.com/) `^3.4.17`
-- **Persistência Local:** `@react-native-async-storage/async-storage` `2.2.0`
+- **Persistência Local Primária:** [Expo SQLite](https://docs.expo.dev/versions/v58.0.0/sdk/sqlite/) `~58.0.15` (Banco relacional local `peia.db`)
+- **Persistência Local Secundária (Fallback):** `@react-native-async-storage/async-storage` `2.2.0`
+- **Processamento de Currículo & OCR:** `expo-ocr-kit` `0.1.4` (Nativo) e `tesseract.js` `^7.0.0` + `pdfjs-dist` `^5.4.624` (Web)
 - **Ícones:** `@expo/vector-icons` (Ionicons)
-- **Linguagem:** TypeScript `~6.0.3` com checagem estrita
+- **Linguagem:** TypeScript `~6.0.3` com tipagem e checagem estritas
 
 ---
 
@@ -23,51 +25,63 @@ O **PEIA** é um aplicativo mobile focado na gestão, busca e publicação de va
 
 ```text
 PEIA/
-├── assets/                    # Imagens estáticas, fontes e ícones do app
-├── docs/                      # Documentação de arquitetura, guias e changelog de agentes
-│   ├── ARCHITECTURE.md        # Este documento (estrutura e arquitetura)
+├── assets/                    # Imagens estáticas, fontes e ícones adaptativos do app
+├── docs/                      # Documentação de arquitetura, guias e governança de agentes
+│   ├── ARCHITECTURE.md        # Este documento (visão arquitetural e estrutural)
 │   ├── CHANGELOG_AGENTS.md    # Registro mandatório de mudanças realizadas por agentes
 │   └── GIT_COLLABORATION_GUIDE.md # Normas de sincronia no Git/GitHub
-├── scripts/                   # Scripts utilitários de suporte ao desenvolvimento
+├── scripts/                   # Scripts utilitários de build e automação
 ├── src/
 │   ├── app/                   # Rotas e telas do Expo Router (File-based Routing)
 │   │   ├── _layout.tsx        # Layout raiz com tema escuro/claro e Stack principal
-│   │   ├── index.tsx          # Tela de login e cadastro (Auth inicial)
-│   │   ├── home/              # Área logada (Tabs)
-│   │   │   ├── _layout.tsx    # Configuração da barra inferior de navegação (Tabs)
+│   │   ├── index.tsx          # Tela pública de login e cadastro (Auth com atalhos de demo)
+│   │   ├── admin/             # Módulo Administrativo (Restrito a Admin e Super Admin)
+│   │   │   ├── _layout.tsx    # Stack de navegação do módulo de administração
+│   │   │   └── usuarios.tsx   # Painel de gestão e cadastro interno hierárquico
+│   │   ├── home/              # Área logada principal (Tabs adaptativas por perfil)
+│   │   │   ├── _layout.tsx    # Configuração das Tabs com exibição dinâmica por persona
 │   │   │   ├── index.tsx      # Feed principal com busca e filtros de vagas
-│   │   │   ├── scan.tsx       # Tela de escaneamento de credencial / QR code
-│   │   │   ├── companies.tsx  # Cadastro local de empresas pela coordenação
-│   │   │   ├── profile.tsx    # Tela de visualização e edição de perfil
-│   │   │   └── logout.tsx     # Handler de saída de sessão
+│   │   │   ├── scan.tsx       # Leitura e extração de currículos (Câmera, Imagem ou PDF)
+│   │   │   ├── companies.tsx  # Cadastro local de empresas parceiras (Coordenação/Admin)
+│   │   │   ├── profile.tsx    # Perfil do usuário, currículo, inscrições e atalho admin
+│   │   │   └── logout.tsx     # Handler de encerramento de sessão
 │   │   └── vaga/              # Rotas dinâmicas e formulários de vagas
 │   │       ├── _layout.tsx    # Stack de navegação de vagas
-│   │       ├── [id].tsx       # Detalhes, arquivamento e exclusão de vaga específica
-│   │       └── form.tsx       # Criação e edição de vagas
+│   │       ├── [id].tsx       # Detalhes da vaga, candidatura do aluno e restrições
+│   │       └── form.tsx       # Anúncio de novas vagas (exclusivo para perfil Empresa)
 │   ├── components/            # Componentes visuais modulares e reutilizáveis
-│   │   ├── auth/              # Componentes de autenticação (Header, Form, Footer)
-│   │   ├── home/              # Componentes específicos da Home (Header, etc.)
-│   │   └── ui/                # Primitivos de UI (Button, Input, AlertModal, ThemeToggle)
+│   │   ├── auth/              # Formulários, atalhos rápidos e cabeçalhos de autenticação
+│   │   ├── home/              # Header e elementos visuais da Home
+│   │   └── ui/                # Primitivos de UI acessíveis (Button, Input, AlertModal, ThemeToggle)
 │   ├── constants/             # Constantes globais
 │   │   ├── routes.ts          # Nomes e caminhos tipados de rotas (`ROUTES`)
 │   │   └── theme.ts           # Definições de cores e tokens de tema
-│   ├── data/                  # Schemas, tipos e mocks de dados
-│   │   └── vagas.ts           # Interface Vaga, constantes de áreas e modalidades, mock inicial
-│   ├── hooks/                 # Custom hooks e stores de estado
-│   │   ├── use-vagas.ts       # Store global reativo de vagas com persistência no AsyncStorage
-│   │   ├── use-perfil.ts      # Store global reativo de perfil com persistência no AsyncStorage
-│   │   ├── use-user-role.ts    # Papel do protótipo: empresa, estudante ou coordenação
-│   │   ├── use-empresas.ts     # Empresas cadastradas localmente pela coordenação
-│   │   ├── use-inscricoes.ts   # Inscrições locais de estudantes em vagas
-│   │   ├── use-auth-form.ts   # Lógica e validação do formulário de autenticação
-│   │   ├── use-theme.ts       # Acesso e controle de tema
+│   ├── data/                  # Entidades de domínio, schemas e mocks
+│   │   ├── user.ts            # Entidade de domínio User e personas (Aluno, Empresa, Admin, Super Admin)
+│   │   └── vagas.ts           # Interface Vaga, constantes de áreas, modalidades e mocks
+│   ├── hooks/                 # Custom hooks e stores de estado reativos
+│   │   ├── use-auth.ts        # Caso de uso de autenticação e orquestração de usuário
+│   │   ├── use-auth-form.ts   # Lógica e validação da interface de autenticação
+│   │   ├── use-user-role.ts   # Papel ativo no protótipo (estudante, empresa, coordenacao)
+│   │   ├── use-vagas.ts       # Store global reativo de vagas integrado ao vagasService
+│   │   ├── use-perfil.ts      # Store global reativo do perfil da sessão ativa
+│   │   ├── use-empresas.ts    # Store de empresas parceiras cadastradas
+│   │   ├── use-inscricoes.ts  # Store de candidaturas dos estudantes nas vagas
+│   │   ├── use-theme.ts       # Acesso e controle do tema claro/escuro
 │   │   └── use-color-scheme.ts# Wrapper para detecção de tema do sistema
-│   ├── utils/                 # Funções auxiliares puras
-│   │   └── validators.ts      # Validadores de e-mail, senha, telefone, etc.
+│   ├── services/              # Camada de serviços e persistência
+│   │   ├── user-service.ts    # Persistência de usuários (SQLite com fallback transparente)
+│   │   └── vagas-service.ts   # Persistência de vagas (SQLite com fallback transparente)
+│   ├── utils/                 # Funções auxiliares puras e OCR agnóstico de plataforma
+│   │   ├── ocr.ts             # Interface unificada de extração de texto de currículos
+│   │   ├── ocr.native.ts      # Extração nativa em Android/iOS usando expo-ocr-kit
+│   │   ├── ocr.web.ts         # Extração web usando Tesseract.js e PDF.js
+│   │   └── validators.ts      # Validadores de e-mail institucional, senha, telefone, etc.
 │   └── global.css             # Importação de diretivas Tailwind do NativeWind
-├── AGENTS.md                  # Instruções operacionais para Agentes de IA
-├── app.json                   # Configurações do Expo
-├── package.json               # Dependências e scripts npm
+├── AGENTS.md                  # Instruções e regras mandatórias para Agentes de IA
+├── app.json                   # Configurações do Expo SDK 58 e EAS Build
+├── eas.json                   # Perfis de build para Android APK e Dev Client
+├── package.json               # Dependências do ecossistema Expo 58
 ├── tailwind.config.js         # Configurações do TailwindCSS
 └── tsconfig.json              # Configurações do TypeScript e alias `@/*` -> `./src/*`
 ```
@@ -76,35 +90,60 @@ PEIA/
 
 ## 3. Padrões de Arquitetura e Engenharia
 
-### 3.1. Roteamento (Expo Router v4 / SDK 57)
-- Toda rota é definida pelo nome do arquivo dentro de `src/app/`.
-- Rotas dinâmicas utilizam colchetes, como `src/app/vaga/[id].tsx`.
-- Para navegação imperativa, utilize `useRouter()` de `expo-router` ou valores constantes definidos em `src/constants/routes.ts`.
-- **Atenção:** Leia sempre a documentação oficial da versão `v57.0.0` do Expo antes de introduzir novas APIs de roteamento.
+### 3.1. Roteamento (Expo Router v4 / SDK 58)
+- Toda rota é mapeada a partir de arquivos dentro de `src/app/`.
+- **Rotas Públicas:** `/` (Autenticação e cadastro com atalhos para teste).
+- **Rotas Autenticadas (Tabs):** `/home` (`index.tsx`, `scan.tsx`, `companies.tsx`, `profile.tsx`, `logout.tsx`).
+  - As abas da barra inferior adaptam-se dinamicamente conforme o papel (`role`):
+    - **Estudante:** Vê "Estágios", "Escanear", "Perfil" e "Sair".
+    - **Empresa:** Vê "Vagas", "Conta" e "Sair" (aba de escanear currículo é oculta).
+    - **Coordenação:** Vê "Oportunidades", "Empresas", "Conta" e "Sair" (abre inicialmente na aba de empresas).
+- **Rotas Administrativas:** `/admin/usuarios` (Protegida por checagem de perfil: apenas `admin` e `superadmin`).
+- **Rotas de Vagas:** `/vaga/[id]` (Detalhes e inscrição) e `/vaga/form` (Criação de novas vagas).
+- **Atenção:** Consulte sempre a documentação oficial da versão `v58.0.0` do Expo: https://docs.expo.dev/versions/v58.0.0/
 
-### 3.2. Gerenciamento de Estado Minimalista (Sem Redux / Zustand)
-- O projeto adota o padrão `useSyncExternalStore` combinado com `@react-native-async-storage/async-storage`:
-  - **Single Source of Truth:** Uma variável em memória compartilhada com um `Set` de ouvintes reativos (`listeners`).
-  - **Sincronia Automática:** Mudanças são persistidas de forma assíncrona no AsyncStorage através de uma função `commit()`.
-  - **Soft Delete:** A remoção de itens (como vagas e perfis) prioriza o arquivamento ou a marcação de timestamp `excluidaEm` / `excluidoEm`, preservando o histórico e integridade dos dados.
-  - **Regra:** Não adicione bibliotecas pesadas de estado global (Redux, MobX) a menos que explicitamente solicitado. Reutilize o padrão existente em `src/hooks/use-vagas.ts` e `src/hooks/use-perfil.ts`.
+### 3.2. Persistência Resiliente (SQLite Nativo + Fallback Automático para AsyncStorage)
+Para garantir alta performance em produção sem quebrar o ambiente de desenvolvimento (Expo Go, web ou ambientes onde o módulo nativo C++ não está compilado), o projeto adota uma arquitetura em duas camadas:
+1. **Detecção e Proteção:** Os serviços (`user-service.ts` e `vagas-service.ts`) utilizam `requireOptionalNativeModule('ExpoSQLite')` para verificar previamente se o módulo binário do SQLite está linkado.
+2. **Ambiente com SQLite compilado (Dev Client / APK standalone):**
+   - Cria tabelas relacionais no banco `peia.db` (`users` e `vagas`).
+   - Executa consultas SQL estruturadas com transações seguras.
+3. **Ambiente sem SQLite compilado (Expo Go genérico / Web):**
+   - Redireciona as operações de leitura e escrita silenciosamente para o `@react-native-async-storage/async-storage` sem disparar logs de advertência ou erros não capturados.
+4. **Reatividade na Interface:** O gerenciamento do estado na UI utiliza o hook nativo `useSyncExternalStore`, garantindo atualizações instantâneas de tela sem overhead de bibliotecas pesadas de estado global.
 
-### 3.3. Estilização com NativeWind v4 e Suporte a Tema Escuro
-- Utilize classes utilitárias via `className="..."`.
-- O tema escuro é configurado nativamente com classes prefixadas por `dark:` (ex: `bg-slate-50 dark:bg-[#03031b]`).
-- O estado de tema pode ser alternado via `useColorScheme()` do NativeWind e o componente `ThemeToggle` (`src/components/ui/theme-toggle.tsx`).
+### 3.3. Separação de Perfis (Personas) e Regras de Negócio
+O sistema adota a entidade de domínio `User` (`src/data/user.ts`) com hierarquia clara:
+- **Aluno (Estudante):**
+  - Cadastro público permitido.
+  - Pode buscar e filtrar vagas no feed.
+  - Pode escanear ou carregar currículo para preenchimento automático.
+  - Pode se candidatar a vagas de estágio (inscrições salvas localmente).
+- **Empresa:**
+  - Cadastro realizado via administração/coordenação ou seleção de persona.
+  - Pode publicar novas vagas de estágio pelo formulário.
+  - **Restrição:** Não tem permissão para editar, arquivar ou excluir anúncios existentes.
+- **Administrador (Coordenação):**
+  - Acesso à aba de cadastro de empresas parceiras.
+  - Acesso ao Painel de Gestão de Usuários (`/admin/usuarios`).
+  - Pode cadastrar novas Empresas e novos Alunos.
+- **Super Administrador:**
+  - Nível mais alto da hierarquia.
+  - Pode cadastrar Administradores, Empresas e Alunos.
 
-### 3.4. Papéis no protótipo
-- O papel selecionado no acesso é salvo localmente em `peia:tipo-usuario` e controla as ações visíveis.
-- Empresas podem anunciar novas vagas; estudantes podem se inscrever; coordenação cadastra empresas.
-- Empresas não podem editar, arquivar ou excluir vagas anunciadas.
-- O perfil de estudante reúne currículo e inscrições; empresa e coordenação veem apenas os dados de conta.
-- A aba de empresas é a tela inicial da coordenação.
-- Como o projeto ainda não possui backend de autenticação/autorização, essa separação serve apenas para demonstração no cliente.
+### 3.4. Extração de Currículo por OCR
+A funcionalidade de leitura de currículo suporta múltiplos formatos de forma agnóstica de plataforma:
+- **Mobile Nativo:** Captura via câmera do dispositivo ou galeria com OCR local em alta velocidade através do `expo-ocr-kit`.
+- **Web:** Extração de texto de arquivos PDF (via `pdfjs-dist`) e imagens (via `tesseract.js`) diretamente no navegador, sem tráfego de imagens para servidores externos.
 
-### 3.5. Acessibilidade e Boas Práticas
-- Todos os botões e áreas interativas devem incluir `accessibilityRole="button"` e, caso não possuam texto explícito visível, `accessibilityLabel`.
-- Inputs devem possuir rótulos acessíveis e comportamentos previsíveis com `KeyboardAvoidingView` e `keyboardShouldPersistTaps="handled"`.
+### 3.5. Estilização com NativeWind v4 e Suporte a Tema Escuro
+- Estilização utilitária declarativa com TailwindCSS v3 (`className="..."`).
+- Tema escuro completo em todas as telas com classes prefixadas por `dark:` (ex: `bg-slate-50 dark:bg-[#03031b]`).
+- Alternância de tema via `useColorScheme()` e componente `ThemeToggle` (`src/components/ui/theme-toggle.tsx`).
+
+### 3.6. Acessibilidade e Boas Práticas
+- Todos os botões e áreas interativas possuem `accessibilityRole="button"` e rótulos acessíveis (`accessibilityLabel`).
+- Formulários utilizam `KeyboardAvoidingView` e `keyboardShouldPersistTaps="handled"` para digitação confortável em qualquer dispositivo.
 
 ---
 

@@ -28,6 +28,21 @@ Este documento é o **registro oficial e mandatório** de todas as mudanças imp
 
 ## Histórico de Mudanças
 
+### [2026-11-11] - Atualização Integral da Documentação Técnica de Arquitetura e Diretrizes
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** A documentação técnica estava desatualizada em relação à versão do ecossistema Expo (SDK 58), React Native 0.88, persistência SQLite resiliente, OCR agnóstico de plataforma, novos fluxos de administração e personas de usuário integradas.
+- **Arquivos Alterados / Criados:**
+  - `docs/ARCHITECTURE.md` (Modificado - stack atualizada para Expo 58, React Native 0.88, React 19.3, persistência híbrida SQLite + AsyncStorage, árvore de diretórios completa e seções de personas/OCR)
+  - `AGENTS.md` (Modificado - resumo da estrutura sincronizado com rotas de administração, empresas parceiras e persistência resiliente)
+  - `docs/GIT_COLLABORATION_GUIDE.md` (Modificado - alinhamento sobre padrões de persistência)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - Atualização dos metadados de dependências e versões oficiais do projeto.
+  - Mapeamento detalhado da árvore de diretórios incluindo os módulos `src/app/admin/`, `src/services/`, `src/utils/ocr.*` e os hooks integrados.
+  - Documentação da arquitetura de persistência em duas camadas (SQLite com detecção via `requireOptionalNativeModule` e fallback silencioso para AsyncStorage).
+  - Descrição da hierarquia de personas (`aluno`, `empresa`, `admin`, `superadmin`) e das regras de negócio de vagas e inscrições.
+- **Impactos & Observações:** Alinhamento completo da documentação com o código-fonte atual do repositório. Nenhuma alteração funcional em tempo de execução.
+
 ### [2026-11-11] - Sincronização de Branches (scanner-curriculo -> main) e Harmonização de Perfis
 - **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
 - **Motivação / Contexto:** Integração das alterações de fluxos por tipo de usuário enviadas por Tiago na branch `scanner-curriculo` com a branch `main` (que inclui Expo 58, SQLite e tela de gestão de usuários).

@@ -23,7 +23,8 @@ Diferentes pessoas e agentes trabalham simultaneamente neste repositório. Para 
 
 ## 3. Resumo da Estrutura Básica Existente
 - **Roteamento:** Expo Router v4 baseado em arquivos dentro de `src/app/`.
-  - Telas existentes: Auth/Login (`/`), Feed de Vagas (`/home`), Escanear (`/home/scan`), Perfil (`/home/profile`), Detalhes de Vaga (`/vaga/[id]`), Formulário de Vaga (`/vaga/form`).
-- **Estado Global & Persistência:** Não use Redux ou Zustand. O repositório utiliza o padrão minimalista com `useSyncExternalStore` + `@react-native-async-storage/async-storage` (veja `src/hooks/use-vagas.ts` e `src/hooks/use-perfil.ts`).
+  - Telas existentes: Auth/Login (`/`), Feed de Vagas (`/home`), Escanear (`/home/scan`), Empresas Parceiras (`/home/companies`), Perfil (`/home/profile`), Detalhes de Vaga (`/vaga/[id]`), Formulário de Vaga (`/vaga/form`), Painel de Gestão de Usuários (`/admin/usuarios`).
+- **Estado Global & Persistência:** Não use Redux ou Zustand. O repositório utiliza persistência resiliente em SQLite (`expo-sqlite` ~58) com fallback transparente para `@react-native-async-storage/async-storage` e padrão reativo `useSyncExternalStore` (veja `src/services/` e `src/hooks/`).
+- **Perfis de Usuário:** Suporte a personas (Aluno/Estudante, Empresa, Administrador/Coordenação, Super Administrador) com controle de exibição de abas e ações.
 - **Estilização:** NativeWind v4 (TailwindCSS) com suporte completo a tema escuro (`dark:`), paleta Indigo/Slate e componente `ThemeToggle`.
 - **Componentes:** Primitivos reutilizáveis em `src/components/ui/` (`Button`, `Input`, `AlertModal`, `ThemeToggle`).
