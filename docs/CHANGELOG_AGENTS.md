@@ -28,6 +28,18 @@ Este documento é o **registro oficial e mandatório** de todas as mudanças imp
 
 ## Histórico de Mudanças
 
+### [2026-11-11] - Unificação de Acessos Rápidos na Tela de Autenticação
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Existiam dois blocos concorrentes de seleção/acesso rápido na tela de login: o seletor de pills "Entrar como" (trazido na branch do Tiago) e a barra de atalhos rápidos de apresentação com preenchimento de credenciais SQLite.
+- **Arquivos Alterados / Criados:**
+  - `src/components/auth/auth-form.tsx` (Modificado)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - Removido o bloco redundante de pills "Entrar como" do topo do card de autenticação.
+  - Mantido e aprimorado o bloco "Acesso Rápido para Apresentação" na base do formulário, que preenche automaticamente o e-mail, senha e define o `userRole` correspondente (Aluno -> `estudante`, Empresa -> `empresa`, Admin / Super Admin -> `coordenacao`).
+  - Restabelecidos os emojis identificadores (`🎓 Aluno`, `🏢 Empresa`, `🛡️ Admin`, `👑 Super Admin`).
+- **Impactos & Observações:** Interface de login mais limpa, intuitiva e sem duplicidade de seletores. TypeScript validado com 0 erros.
+
 ### [2026-11-11] - Atualização Integral da Documentação Técnica de Arquitetura e Diretrizes
 - **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
 - **Motivação / Contexto:** A documentação técnica estava desatualizada em relação à versão do ecossistema Expo (SDK 58), React Native 0.88, persistência SQLite resiliente, OCR agnóstico de plataforma, novos fluxos de administração e personas de usuário integradas.

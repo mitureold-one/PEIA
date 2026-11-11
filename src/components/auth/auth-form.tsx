@@ -4,8 +4,7 @@ import { Input } from '@/components/ui/input';
 import { useAuthForm } from '@/hooks/use-auth-form';
 import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from 'nativewind';
-import { Pressable, Text, TouchableOpacity, View } from 'react-native';
-import { USER_ROLES } from '@/hooks/use-user-role';
+import { Text, TouchableOpacity, View } from 'react-native';
 
 export interface AuthFormProps {
   isSignUp: boolean;
@@ -62,25 +61,6 @@ export function AuthForm({ isSignUp }: AuthFormProps) {
             ? 'Preencha seus dados para iniciar a sua jornada no PEIA.'
             : 'Entre com suas credenciais institucionais ou corporativas.'}
         </Text>
-      </View>
-
-      <View className="mb-4 gap-2">
-        <Text className="text-xs font-semibold text-slate-700 dark:text-slate-300">Entrar como</Text>
-        <View className="flex-row flex-wrap gap-2">
-          {USER_ROLES.filter((role) => !isSignUp || role.value !== 'coordenacao').map((role) => (
-            <Pressable
-              key={role.value}
-              onPress={() => setUserRole(role.value)}
-              accessibilityRole="button"
-              accessibilityState={{ selected: userRole === role.value }}
-              className={`rounded-full border px-3 py-2 ${userRole === role.value ? 'border-indigo-600 bg-indigo-600' : 'border-slate-300 dark:border-slate-700'}`}
-            >
-              <Text className={`text-xs font-medium ${userRole === role.value ? 'text-white' : 'text-slate-700 dark:text-slate-300'}`}>
-                {role.label}
-              </Text>
-            </Pressable>
-          ))}
-        </View>
       </View>
 
       {isSignUp ? (
@@ -236,10 +216,11 @@ export function AuthForm({ isSignUp }: AuthFormProps) {
                 onPress={() => {
                   setLoginEmail('john.doe@aluno.undb.edu.br');
                   setLoginPassword('password123');
+                  setUserRole('estudante');
                 }}
                 className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex-row items-center gap-1.5 active:opacity-70"
               >
-                <Text className="text-xs"></Text>
+                <Text className="text-xs">🎓</Text>
                 <Text className="text-xs font-semibold text-slate-700 dark:text-slate-200">Aluno</Text>
               </TouchableOpacity>
 
@@ -247,10 +228,11 @@ export function AuthForm({ isSignUp }: AuthFormProps) {
                 onPress={() => {
                   setLoginEmail('recrutamento@techcorp.com.br');
                   setLoginPassword('password123');
+                  setUserRole('empresa');
                 }}
                 className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex-row items-center gap-1.5 active:opacity-70"
               >
-
+                <Text className="text-xs">🏢</Text>
                 <Text className="text-xs font-semibold text-slate-700 dark:text-slate-200">Empresa</Text>
               </TouchableOpacity>
 
@@ -258,10 +240,11 @@ export function AuthForm({ isSignUp }: AuthFormProps) {
                 onPress={() => {
                   setLoginEmail('admin@undb.edu.br');
                   setLoginPassword('password123');
+                  setUserRole('coordenacao');
                 }}
                 className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex-row items-center gap-1.5 active:opacity-70"
               >
-
+                <Text className="text-xs">🛡️</Text>
                 <Text className="text-xs font-semibold text-slate-700 dark:text-slate-200">Admin</Text>
               </TouchableOpacity>
 
@@ -269,10 +252,11 @@ export function AuthForm({ isSignUp }: AuthFormProps) {
                 onPress={() => {
                   setLoginEmail('root@peia.edu.br');
                   setLoginPassword('password123');
+                  setUserRole('coordenacao');
                 }}
                 className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex-row items-center gap-1.5 active:opacity-70"
               >
-
+                <Text className="text-xs">👑</Text>
                 <Text className="text-xs font-semibold text-slate-700 dark:text-slate-200">Super Admin</Text>
               </TouchableOpacity>
             </View>
