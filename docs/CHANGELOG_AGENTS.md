@@ -28,23 +28,6 @@ Este documento é o **registro oficial e mandatório** de todas as mudanças imp
 
 ## Histórico de Mudanças
 
-### [2026-11-11] - Redesign do Header do Estudante (Foto Quadrada e Atalhos à Direita) e Remoção da Lista de Vagas
-- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
-- **Motivação / Contexto:** Aprimoramento visual de layout e otimização de espaço na tela de Perfil do Estudante solicitados pelo usuário:
-  - O componente solto `ProfileInscricoesList` foi removido da timeline principal da página, já que as inscrições agora são visualizadas e pesquisadas em ordem alfabética através do modal centralizado disparado pelo contador.
-  - O cabeçalho `ProfileStudentHeader` foi redesenhado no formato de painel dividido:
-    - **Lado Esquerdo:** foto de perfil em **quadrado com cantos arredondados** (`rounded-2xl`), acompanhada do nome do estudante, ocupação ("Estudante de Tecnologia"), instituição ("UNDB") e tag "Aberto a Oportunidades".
-    - **Lado Direito:** coluna vertical com 3 atalhos elegantes para as listas modais de Inscrições, Empresas Seguidas e Conexões (com ícones, contadores numéricos e chevrons).
-- **Arquivos Alterados / Criados:**
-  - `src/components/profile/profile-student-header.tsx` (Refatorado - novo layout split com foto quadrada arredondada e identificação à esquerda e botões de atalho verticais à direita)
-  - `src/components/profile/student-profile-view.tsx` (Refatorado - removida a chamada redundante de `ProfileInscricoesList`)
-  - `src/components/profile/profile-inscricoes-list.tsx` (Removido - funcionalidade absorvida pelo modal de métricas)
-  - `docs/ARCHITECTURE.md` (Modificado)
-  - `docs/CHANGELOG_AGENTS.md` (Modificado)
-- **Principais Mudanças:**
-  - Layout mais moderno, aproveitando melhor o espaço horizontal da tela e eliminando componentes duplicados.
-- **Impactos & Observações:** Checagem TypeScript estrita concluída com 0 erros (`npx tsc --noEmit`).
-
 ### [2026-11-11] - Modal Genérico Centralizado com Blur para Métricas (Inscrições, Empresas, Conexões)
 - **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
 - **Motivação / Contexto:** Unificação arquitetural e refinamento visual de UX na tela de Perfil do Estudante atendendo à solicitação do usuário:

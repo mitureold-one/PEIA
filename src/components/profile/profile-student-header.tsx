@@ -50,14 +50,14 @@ export function ProfileStudentHeader() {
     perfil?.surname ? perfil.surname[0] : ''
   }`.toUpperCase();
 
-  // 1. Inscrições em ordem alfabética (A-Z)
+  // 1. Dados de Inscrições em Ordem Alfabética (A-Z)
   const vagasInscritas = useMemo(() => {
     return vagas
       .filter((v) => inscricoes.includes(v.id))
       .sort((a, b) => a.titulo.localeCompare(b.titulo, 'pt-BR', { sensitivity: 'base' }));
   }, [vagas, inscricoes]);
 
-  // 2. Empresas seguidas em ordem alfabética (A-Z)
+  // 2. Dados de Empresas Seguidas em Ordem Alfabética (A-Z)
   const empresasSeguidas = useMemo(() => {
     const map = new Map<string, { id: string; nome: string; setor: string }>();
     EMPRESAS_BASE.forEach((e) => map.set(e.id, e));
@@ -70,7 +70,7 @@ export function ProfileStudentHeader() {
       .sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR', { sensitivity: 'base' }));
   }, [empresasCadastradas, seguindoEmpresas]);
 
-  // 3. Conexões em ordem alfabética (A-Z)
+  // 3. Dados de Conexões em Ordem Alfabética (A-Z)
   const colegasConectados = useMemo(() => {
     return COLEGAS_BASE
       .filter((c) => seguindoUsuarios.includes(c.id))
@@ -79,149 +79,118 @@ export function ProfileStudentHeader() {
 
   return (
     <>
-      {/* Card Header com divisão: Identificação à esquerda e Atalhos de Listas à direita */}
-      <View className="rounded-3xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-950/70 shadow-sm">
-        <View className="flex-row items-center justify-between gap-4">
-          {/* LADO ESQUERDO: Foto em quadrado com cantos arredondados, Nome e Ocupação */}
-          <View className="flex-1 gap-2.5">
-            <View className="flex-row items-center gap-3">
-              {/* Foto em Quadrado com Cantos Arredondados */}
-              <Pressable
-                onPress={() => router.push(ROUTES.CONFIGURACOES)}
-                accessibilityRole="button"
-                accessibilityLabel="Editar foto de perfil e dados cadastrais"
-                className="relative active:opacity-85"
-              >
-                <View className="h-18 w-18 sm:h-20 sm:w-20 rounded-2xl border-2 border-indigo-500/40 dark:border-indigo-400/50 p-1 bg-white dark:bg-slate-900 shadow-sm overflow-hidden items-center justify-center">
-                  {perfil?.avatar ? (
-                    <Image
-                      source={{ uri: perfil.avatar }}
-                      resizeMode="cover"
-                      className="h-full w-full rounded-xl"
-                    />
-                  ) : (
-                    <View className="h-full w-full rounded-xl bg-indigo-600 items-center justify-center">
-                      <Text className="text-xl sm:text-2xl font-black text-white">
-                        {iniciais}
-                      </Text>
-                    </View>
-                  )}
+      <View className="rounded-3xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950/60 shadow-sm gap-4">
+        {/* Foto do Estudante e Identificação */}
+        <View className="items-center gap-3">
+          <Pressable
+            onPress={() => router.push(ROUTES.CONFIGURACOES)}
+            accessibilityRole="button"
+            accessibilityLabel="Editar foto e dados cadastrais"
+            className="relative active:opacity-85"
+          >
+            <View className="h-24 w-24 rounded-full border-2 border-indigo-500/40 dark:border-indigo-400/50 p-1 bg-white dark:bg-slate-900 shadow-md">
+              {perfil?.avatar ? (
+                <Image
+                  source={{ uri: perfil.avatar }}
+                  resizeMode="cover"
+                  className="h-full w-full rounded-full"
+                />
+              ) : (
+                <View className="h-full w-full rounded-full bg-indigo-600 items-center justify-center">
+                  <Text className="text-2xl font-black text-white">
+                    {iniciais}
+                  </Text>
                 </View>
-
-                {/* Badge de Edição */}
-                <View className="absolute -bottom-1 -right-1 h-6 w-6 rounded-full bg-indigo-600 border border-white dark:border-slate-900 items-center justify-center shadow-xs">
-                  <Ionicons name="create-outline" size={11} color="#ffffff" />
-                </View>
-              </Pressable>
-
-              {/* Nome e Ocupação */}
-              <View className="flex-1 pr-1">
-                <Text
-                  numberOfLines={1}
-                  className="text-base sm:text-lg font-bold text-slate-900 dark:text-white"
-                >
-                  {nomeCompleto}
-                </Text>
-                <Text
-                  numberOfLines={1}
-                  className="text-xs text-indigo-600 dark:text-indigo-400 font-semibold"
-                >
-                  Estudante de Tecnologia
-                </Text>
-                <Text
-                  numberOfLines={1}
-                  className="text-[11px] text-slate-500 dark:text-slate-400 mt-0.5"
-                >
-                  UNDB · Graduação
-                </Text>
-              </View>
+              )}
             </View>
 
-            {/* Tag de Oportunidades */}
-            <View className="flex-row items-center">
+            {/* Badge de Edição */}
+            <View className="absolute bottom-0 right-0 h-7 w-7 rounded-full bg-indigo-600 border-2 border-white dark:border-slate-900 items-center justify-center shadow-sm">
+              <Ionicons name="create-outline" size={13} color="#ffffff" />
+            </View>
+          </Pressable>
+
+          <View className="items-center gap-1">
+            <Text className="text-xl font-bold text-slate-900 dark:text-white text-center">
+              {nomeCompleto}
+            </Text>
+            <Text className="text-xs text-slate-500 dark:text-slate-400 text-center">
+              Estudante de Tecnologia · UNDB
+            </Text>
+
+            <View className="flex-row items-center gap-2 mt-1">
               <View className="px-2.5 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200 dark:border-emerald-800">
-                <Text className="text-[10px] font-semibold text-emerald-700 dark:text-emerald-300">
+                <Text className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-300">
                   ● Aberto a Oportunidades
                 </Text>
               </View>
             </View>
           </View>
+        </View>
 
-          {/* LADO DIREITO: Atalhos verticais para as Listas (Inscrições, Empresas, Conexões) */}
-          <View className="gap-2 w-36">
-            {/* 1. Atalho Inscrições */}
-            <Pressable
-              onPress={() => setMetricaAtiva('inscricoes')}
-              accessibilityRole="button"
-              accessibilityLabel="Ver lista de inscrições"
-              className="flex-row items-center justify-between px-3 py-2 rounded-2xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 active:scale-95 shadow-2xs"
-            >
-              <View className="flex-row items-center gap-2">
-                <View className="h-6 w-6 rounded-lg bg-indigo-100 dark:bg-indigo-950/70 items-center justify-center">
-                  <Ionicons name="briefcase" size={12} color="#6366f1" />
-                </View>
-                <View>
-                  <Text className="text-xs font-black text-slate-900 dark:text-white">
-                    {vagasInscritas.length}
-                  </Text>
-                  <Text className="text-[10px] text-slate-500 dark:text-slate-400">
-                    Inscrições
-                  </Text>
-                </View>
-              </View>
-              <Ionicons name="chevron-forward" size={13} color="#94a3b8" />
-            </Pressable>
+        {/* Barra com os 3 Contadores Interativos */}
+        <View className="flex-row items-center justify-around py-3 px-2 rounded-2xl bg-slate-50 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800/80">
+          {/* 1. Contador Inscrições */}
+          <Pressable
+            onPress={() => setMetricaAtiva('inscricoes')}
+            accessibilityRole="button"
+            accessibilityLabel="Ver vagas inscritas"
+            className="items-center flex-1 active:opacity-75"
+          >
+            <Text className="text-base font-black text-indigo-600 dark:text-indigo-400">
+              {vagasInscritas.length}
+            </Text>
+            <View className="flex-row items-center gap-0.5">
+              <Text className="text-[11px] text-slate-700 dark:text-slate-300 font-semibold underline">
+                Inscrições
+              </Text>
+              <Ionicons name="chevron-forward" size={10} color="#6366f1" />
+            </View>
+          </Pressable>
 
-            {/* 2. Atalho Empresas */}
-            <Pressable
-              onPress={() => setMetricaAtiva('empresas')}
-              accessibilityRole="button"
-              accessibilityLabel="Ver lista de empresas que segue"
-              className="flex-row items-center justify-between px-3 py-2 rounded-2xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 active:scale-95 shadow-2xs"
-            >
-              <View className="flex-row items-center gap-2">
-                <View className="h-6 w-6 rounded-lg bg-indigo-100 dark:bg-indigo-950/70 items-center justify-center">
-                  <Ionicons name="business" size={12} color="#6366f1" />
-                </View>
-                <View>
-                  <Text className="text-xs font-black text-slate-900 dark:text-white">
-                    {empresasSeguidas.length}
-                  </Text>
-                  <Text className="text-[10px] text-slate-500 dark:text-slate-400">
-                    Empresas
-                  </Text>
-                </View>
-              </View>
-              <Ionicons name="chevron-forward" size={13} color="#94a3b8" />
-            </Pressable>
+          <View className="h-6 w-[1px] bg-slate-200 dark:bg-slate-800" />
 
-            {/* 3. Atalho Conexões */}
-            <Pressable
-              onPress={() => setMetricaAtiva('conexoes')}
-              accessibilityRole="button"
-              accessibilityLabel="Ver lista de conexões e colegas"
-              className="flex-row items-center justify-between px-3 py-2 rounded-2xl bg-slate-50 dark:bg-slate-900/90 border border-slate-200/80 dark:border-slate-800 active:scale-95 shadow-2xs"
-            >
-              <View className="flex-row items-center gap-2">
-                <View className="h-6 w-6 rounded-lg bg-violet-100 dark:bg-violet-950/70 items-center justify-center">
-                  <Ionicons name="people" size={12} color="#8b5cf6" />
-                </View>
-                <View>
-                  <Text className="text-xs font-black text-slate-900 dark:text-white">
-                    {colegasConectados.length}
-                  </Text>
-                  <Text className="text-[10px] text-slate-500 dark:text-slate-400">
-                    Conexões
-                  </Text>
-                </View>
-              </View>
-              <Ionicons name="chevron-forward" size={13} color="#94a3b8" />
-            </Pressable>
-          </View>
+          {/* 2. Contador Empresas */}
+          <Pressable
+            onPress={() => setMetricaAtiva('empresas')}
+            accessibilityRole="button"
+            accessibilityLabel="Ver empresas seguidas"
+            className="items-center flex-1 active:opacity-75"
+          >
+            <Text className="text-base font-black text-indigo-600 dark:text-indigo-400">
+              {empresasSeguidas.length}
+            </Text>
+            <View className="flex-row items-center gap-0.5">
+              <Text className="text-[11px] text-slate-700 dark:text-slate-300 font-semibold underline">
+                Empresas
+              </Text>
+              <Ionicons name="chevron-forward" size={10} color="#6366f1" />
+            </View>
+          </Pressable>
+
+          <View className="h-6 w-[1px] bg-slate-200 dark:bg-slate-800" />
+
+          {/* 3. Contador Conexões */}
+          <Pressable
+            onPress={() => setMetricaAtiva('conexoes')}
+            accessibilityRole="button"
+            accessibilityLabel="Ver conexões e colegas"
+            className="items-center flex-1 active:opacity-75"
+          >
+            <Text className="text-base font-black text-indigo-600 dark:text-indigo-400">
+              {colegasConectados.length}
+            </Text>
+            <View className="flex-row items-center gap-0.5">
+              <Text className="text-[11px] text-slate-700 dark:text-slate-300 font-semibold underline">
+                Conexões
+              </Text>
+              <Ionicons name="chevron-forward" size={10} color="#6366f1" />
+            </View>
+          </Pressable>
         </View>
       </View>
 
-      {/* Modal Genérico Centralizado: 1. INSCRIÇÕES */}
+      {/* Modal Genérico Hidratado: 1. INSCRIÇÕES */}
       <ProfileMetricDialogModal
         visible={metricaAtiva === 'inscricoes'}
         title="Vagas que Você se Candidatou"
@@ -256,7 +225,7 @@ export function ProfileStudentHeader() {
                 {vaga.empresa} · {vaga.cidade} · {vaga.modalidade}
               </Text>
               <Text className="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold mt-1">
-                ● Inscrição ativa · Toque para ver detalhes
+                ● Inscrição ativa · Toque para detalhes
               </Text>
             </View>
             <Ionicons name="chevron-forward" size={16} color="#94a3b8" />
@@ -264,7 +233,7 @@ export function ProfileStudentHeader() {
         )}
       />
 
-      {/* Modal Genérico Centralizado: 2. EMPRESAS SEGUIDAS */}
+      {/* Modal Genérico Hidratado: 2. EMPRESAS SEGUIDAS */}
       <ProfileMetricDialogModal
         visible={metricaAtiva === 'empresas'}
         title="Empresas que Você Segue"
@@ -311,7 +280,7 @@ export function ProfileStudentHeader() {
         )}
       />
 
-      {/* Modal Genérico Centralizado: 3. CONEXÕES / COLEGAS */}
+      {/* Modal Genérico Hidratado: 3. CONEXÕES / COLEGAS */}
       <ProfileMetricDialogModal
         visible={metricaAtiva === 'conexoes'}
         title="Suas Conexões Acadêmicas"
