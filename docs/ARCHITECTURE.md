@@ -58,7 +58,7 @@ PEIA/
 │   │   ├── home/              # Header, filtros, cards e empty state do feed de vagas
 │   │   ├── profile/           # Componentes modulares da tela de perfil (Header, Dados, Inscrições, Admin)
 │   │   ├── scan/              # Componentes de leitura de currículo (Câmera, Arquivo, Preview)
-│   │   └── ui/                # Primitivos de UI acessíveis (Button, Input, AlertModal, ThemeToggle)
+│   │   └── ui/                # Primitivos de UI acessíveis (Button, Input, AlertModal, ThemeToggle, ProfileMetricDialogModal)
 │   ├── constants/             # Constantes globais
 │   │   ├── routes.ts          # Nomes e caminhos tipados de rotas (`ROUTES`)
 │   │   └── theme.ts           # Definições de cores e tokens de tema

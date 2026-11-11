@@ -28,6 +28,24 @@ Este documento é o **registro oficial e mandatório** de todas as mudanças imp
 
 ## Histórico de Mudanças
 
+### [2026-11-11] - Modal Genérico Centralizado com Blur para Métricas (Inscrições, Empresas, Conexões)
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Unificação arquitetural e refinamento visual de UX na tela de Perfil do Estudante atendendo à solicitação do usuário:
+  - Criação do componente genérico e reutilizável `ProfileMetricDialogModal`, que posiciona um diálogo flutuante centralizado no meio da tela com backdrop translúcido escuro que borra o fundo (`backdrop-blur-md`), fechamento acessível no botão "X" e toque fora.
+  - O mesmo componente genérico agora hidrata os 3 contadores de métricas da foto do estudante:
+    1. **Inscrições:** lista em ordem alfabética (A-Z) das vagas em que o aluno se candidatou, com busca em tempo real, status da inscrição e toque para navegar aos detalhes da vaga.
+    2. **Empresas:** lista em ordem alfabética (A-Z) das empresas acompanhadas, com busca instantânea e toggle de seguir/deixar de seguir.
+    3. **Conexões:** lista em ordem alfabética (A-Z) dos colegas e conexões acadêmicas da comunidade PEIA, com busca por nome ou curso.
+- **Arquivos Alterados / Criados:**
+  - `src/components/ui/profile-metric-dialog-modal.tsx` (Criado - diálogo genérico centralizado com blur no fundo, busca dinâmica com botão de limpar, scroll suave e fechamento no centro da tela)
+  - `src/components/profile/profile-student-header.tsx` (Refatorado - os 3 contadores tornaram-se gatilhos interativos que abrem o modal genérico hidratado)
+  - `src/components/profile/profile-following-companies-modal.tsx` (Removido - substituído pelo modal genérico)
+  - `docs/ARCHITECTURE.md` (Modificado)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - Eliminação de código duplicado e centralização da experiência de listagem das métricas do estudante em uma interface elegante, consistente e responsiva.
+- **Impactos & Observações:** Checagem TypeScript estrita concluída com 0 erros (`npx tsc --noEmit`).
+
 ### [2026-11-11] - Subtela de Empresas Seguidas (Ordem Alfabética + Busca) via Contador
 - **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
 - **Motivação / Contexto:** Aprimoramento de UX no Perfil do Estudante atendendo à solicitação do usuário:
