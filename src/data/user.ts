@@ -9,6 +9,7 @@ export interface UserProps {
   password?: string;
   token?: string;
   role?: UserRole;
+  avatar?: string;
   createdAt?: string;
 }
 
@@ -25,6 +26,7 @@ export class User {
   password?: string;
   token?: string;
   role: UserRole;
+  avatar?: string;
   createdAt: string;
 
   constructor(props: UserProps) {
@@ -36,6 +38,7 @@ export class User {
     this.password = props.password ?? '';
     this.token = props.token || (Math.random().toString(36).substring(2) + Date.now().toString(36));
     this.role = props.role ?? 'aluno';
+    this.avatar = props.avatar;
     this.createdAt = props.createdAt || new Date().toISOString();
   }
 

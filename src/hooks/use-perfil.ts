@@ -11,6 +11,7 @@ export interface Perfil {
   email: string;
   phone: string;
   role?: UserRole;
+  avatar?: string;
   excluidoEm?: string;
 }
 

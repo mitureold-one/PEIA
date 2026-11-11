@@ -17,6 +17,8 @@ export default function Profile() {
     errors,
     saved,
     handleChange,
+    handleAvatarChange,
+    handleRemoveAvatar,
     save,
     confirmarExclusao,
   } = useProfileForm();
@@ -25,7 +27,12 @@ export default function Profile() {
     <SafeAreaView edges={[]} className="flex-1 bg-slate-50 dark:bg-[#03031b]">
       <ScrollView contentContainerClassName="gap-4 p-6" keyboardShouldPersistTaps="handled">
         {/* Cabeçalho da conta e identificação do perfil */}
-        <ProfileHeader perfil={perfil} role={role} />
+        <ProfileHeader
+          perfil={perfil}
+          role={role}
+          onUpdateAvatar={handleAvatarChange}
+          onRemoveAvatar={handleRemoveAvatar}
+        />
 
         {/* Atalho para o painel administrativo (Admin e Super Admin) */}
         <ProfileAdminCard perfil={perfil} />

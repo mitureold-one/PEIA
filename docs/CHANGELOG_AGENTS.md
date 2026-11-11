@@ -28,6 +28,24 @@ Este documento é o **registro oficial e mandatório** de todas as mudanças imp
 
 ## Histórico de Mudanças
 
+### [2026-11-11] - Melhoria de UX no Perfil com Foto de Usuário e Gestor de Avatares
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Aprimoramento da experiência visual e identificação pessoal no Perfil, adicionando suporte completo a foto de perfil/avatar para estudantes, empresas e administradores, com seleção de galeria, avatares rápidos e persistência no SQLite.
+- **Arquivos Alterados / Criados:**
+  - `src/components/profile/profile-avatar.tsx` (Criado - componente de avatar com exibição de imagem, iniciais em alta resolução, badge de câmera com ação modal, seletor de arquivos via `expo-document-picker`, presets rápidos e opção de remoção)
+  - `src/components/profile/profile-header.tsx` (Refatorado - integrado ao `ProfileAvatar`, exibindo card de identidade visual com nome completo, e-mail, persona e status ativo)
+  - `src/data/user.ts` (Modificado - adicionada a propriedade `avatar?: string` na entidade `User` e interface `UserProps`)
+  - `src/hooks/use-perfil.ts` (Modificado - incluído campo `avatar` no store reativo de perfil)
+  - `src/hooks/use-profile-form.ts` (Modificado - adicionados manipuladores `handleAvatarChange` e `handleRemoveAvatar` com persistência instantânea)
+  - `src/services/user-service.ts` (Modificado - migration de coluna `avatar` na tabela `users` do SQLite)
+  - `src/app/home/profile.tsx` (Modificado - repasse dos métodos de avatar para o header)
+  - `docs/ARCHITECTURE.md` (Modificado)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - O perfil agora conta com um card de destaque que exibe a foto do usuário ou iniciais geradas dinamicamente.
+  - Ao tocar no avatar ou no botão de câmera flutuante, abre-se uma modal que permite ao usuário carregar uma foto do aparelho (galeria), selecionar entre avatares pré-definidos ou restaurar para as iniciais.
+- **Impactos & Observações:** Checagem TypeScript estrita concluída com 0 erros (`npx tsc --noEmit`). Layout mais humanizado, agradável e profissional.
+
 ### [2026-11-11] - Implementação da Rota de Conversas e Feedbacks de Candidatura
 - **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
 - **Motivação / Contexto:** Criação da funcionalidade central do PEIA de diagnóstico inteligente e feedbacks de candidatura, permitindo que os estudantes visualizem a aderência de seus currículos às vagas inscritas (Match Score), pontos fortes identificados, recomendações para entrevista e conversem diretamente com recrutadores/IA.

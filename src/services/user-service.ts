@@ -47,6 +47,12 @@ async function ensureInitialized() {
             // Coluna role já existe
           }
 
+          try {
+            sqliteDb.execSync(`ALTER TABLE users ADD COLUMN avatar TEXT;`);
+          } catch {
+            // Coluna avatar já existe
+          }
+
           const result = sqliteDb.getFirstSync<{ count: number }>(
             'SELECT COUNT(*) as count FROM users;'
           );
@@ -116,8 +122,8 @@ export const userService = {
     if (isSQLiteAvailable && sqliteDb) {
       try {
         sqliteDb.runSync(
-          `INSERT OR REPLACE INTO users (id, name, surname, email, phone, password, token, role, createdAt)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+          `INSERT OR REPLACE INTO users (id, name, surname, email, phone, password, token, role, avatar, createdAt)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
           [
             user.id,
             user.name,
@@ -127,6 +133,7 @@ export const userService = {
             user.password ?? '',
             user.token ?? '',
             user.role ?? 'aluno',
+            user.avatar ?? null,
             user.createdAt,
           ]
         );

@@ -10,6 +10,7 @@ export interface ProfileFormData {
   surname: string;
   email: string;
   phone: string;
+  avatar?: string;
 }
 
 export type ProfileFormErrors = Partial<Record<keyof ProfileFormData, string>>;
@@ -19,6 +20,7 @@ const INITIAL_FORM: ProfileFormData = {
   surname: '',
   email: '',
   phone: '',
+  avatar: undefined,
 };
 
 export function useProfileForm() {
@@ -37,6 +39,7 @@ export function useProfileForm() {
         surname: perfil.surname ?? '',
         email: perfil.email ?? '',
         phone: perfil.phone ?? '',
+        avatar: perfil.avatar,
       });
     }
   }, [perfil]);
@@ -46,6 +49,26 @@ export function useProfileForm() {
     setDados((prev) => ({ ...prev, [field]: formatted }));
     setErrors((prev) => ({ ...prev, [field]: undefined }));
     setSaved(false);
+  };
+
+  const handleAvatarChange = (uri: string) => {
+    setDados((prev) => ({ ...prev, avatar: uri }));
+    if (perfil) {
+      perfilActions.editar({
+        ...perfil,
+        avatar: uri,
+      });
+    }
+  };
+
+  const handleRemoveAvatar = () => {
+    setDados((prev) => ({ ...prev, avatar: undefined }));
+    if (perfil) {
+      perfilActions.editar({
+        ...perfil,
+        avatar: undefined,
+      });
+    }
   };
 
   const save = async (): Promise<boolean> => {
@@ -63,6 +86,7 @@ export function useProfileForm() {
       surname: dados.surname.trim(),
       email: dados.email.trim(),
       phone: dados.phone.trim(),
+      avatar: dados.avatar,
       role: perfil?.role,
     });
 
@@ -94,6 +118,8 @@ export function useProfileForm() {
     errors,
     saved,
     handleChange,
+    handleAvatarChange,
+    handleRemoveAvatar,
     save,
     confirmarExclusao,
   };
