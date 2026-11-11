@@ -28,6 +28,25 @@ Este documento é o **registro oficial e mandatório** de todas as mudanças imp
 
 ## Histórico de Mudanças
 
+### [2026-11-11] - Refatoração do Perfil: Foto, Interesses, Conexões e Remoção do Logout da Tab Bar
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Aprimoramento visual e funcional da tela de Perfil (`/home/profile`) e simplificação do menu inferior (Tabs):
+  - Remoção do botão de Logout da barra inferior (Tabs), agora centralizado nas Configurações da Conta acessadas pelo topo esquerdo.
+  - Na tela de Perfil do Estudante, integração em destaque da foto do aluno, contadores sociais (inscrições ativas, empresas seguidas, conexões), gerenciador de Áreas de Interesse (tags interativas) e lista de Empresas Parceiras seguidas, junto com as candidaturas ativas e o Editor do Currículo Master.
+- **Arquivos Alterados / Criados:**
+  - `src/hooks/use-estudante-social.ts` (Criado - store reativo com persistência AsyncStorage para interesses profissionais, empresas seguidas e conexões com colegas)
+  - `src/components/profile/profile-student-header.tsx` (Refatorado - foto de perfil em evidência com badge de edição, informações acadêmicas e barra com 3 métricas sociais)
+  - `src/components/profile/profile-student-interests.tsx` (Criado - componente de chips de interesses profissionais com modal para adicionar novas tags e sugestões rápidas)
+  - `src/components/profile/profile-student-following.tsx` (Criado - componente de empresas parceiras seguidas com botão de seguir/deixar de seguir com feedback instantâneo)
+  - `src/app/home/profile.tsx` (Refatorado - tela de perfil do estudante unificada com foto, métricas, interesses, empresas, candidaturas e currículo)
+  - `src/app/home/_layout.tsx` (Modificado - botão de logout removido da barra de tabs visível e aba renomeada para "Perfil")
+  - `docs/ARCHITECTURE.md` (Modificado)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - Barra de navegação inferior mais espaçosa e focada nas tarefas do usuário.
+  - Tela de perfil rica e dinâmica, valorizando a identidade do estudante, seus objetivos profissionais e conexões com o ecossistema corporativo.
+- **Impactos & Observações:** Checagem TypeScript estrita concluída com 0 erros (`npx tsc --noEmit`).
+
 ### [2026-11-11] - Separação Física: Menu de Conta no Header e Subclasse Estudante no Bottom Tab
 - **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
 - **Motivação / Contexto:** Reestruturação arquitetural de UX solicitada pelo usuário para separar fisicamente as informações da superclasse `User` e as informações da subclasse `Estudante`:

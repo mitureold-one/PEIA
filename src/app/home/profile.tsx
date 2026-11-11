@@ -3,8 +3,10 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUserRole } from '@/hooks/use-user-role';
 import { usePerfil } from '@/hooks/use-perfil';
 import { ProfileStudentHeader } from '@/components/profile/profile-student-header';
-import { ProfileAdminCard } from '@/components/profile/profile-admin-card';
+import { ProfileStudentInterests } from '@/components/profile/profile-student-interests';
+import { ProfileStudentFollowing } from '@/components/profile/profile-student-following';
 import { ProfileInscricoesList } from '@/components/profile/profile-inscricoes-list';
+import { ProfileAdminCard } from '@/components/profile/profile-admin-card';
 import { CurriculoGeralEditor } from '@/components/curriculo/curriculo-geral-editor';
 
 export default function Profile() {
@@ -14,11 +16,22 @@ export default function Profile() {
   return (
     <SafeAreaView edges={[]} className="flex-1 bg-slate-50 dark:bg-[#03031b]">
       <ScrollView contentContainerClassName="gap-5 p-6" keyboardShouldPersistTaps="handled">
-        {/* Módulos Exclusivos da Subclasse Estudante */}
+        {/* Perfil Completo do Estudante (Subclasse) */}
         {role === 'estudante' && (
           <>
+            {/* Foto, Identidade e Métricas Sociais */}
             <ProfileStudentHeader />
+
+            {/* Áreas de Interesse & Foco Profissional */}
+            <ProfileStudentInterests />
+
+            {/* Empresas Parceiras que o Estudante Acompanha */}
+            <ProfileStudentFollowing />
+
+            {/* Minhas Candidaturas e Inscrições */}
             <ProfileInscricoesList />
+
+            {/* Editor do Currículo Geral / Master para IA */}
             <CurriculoGeralEditor />
           </>
         )}

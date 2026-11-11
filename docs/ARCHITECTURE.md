@@ -78,6 +78,7 @@ PEIA/
 │   │   ├── use-user-role.ts   # Papel ativo no protótipo (estudante, empresa, coordenacao)
 │   │   ├── use-vagas.ts       # Store global reativo de vagas integrado ao vagasService
 │   │   ├── use-curriculo.ts   # Store global reativo do currículo geral e currículos direcionados de vagas
+│   │   ├── use-estudante-social.ts # Store de interesses, empresas seguidas e conexões sociais do estudante
 │   │   ├── use-perfil.ts      # Store global reativo do perfil da sessão ativa
 │   │   ├── use-empresas.ts    # Store de empresas parceiras cadastradas
 │   │   ├── use-inscricoes.ts  # Store de candidaturas dos estudantes nas vagas
@@ -110,11 +111,12 @@ PEIA/
 ### 3.1. Roteamento (Expo Router v4 / SDK 58)
 - Toda rota é mapeada a partir de arquivos dentro de `src/app/`.
 - **Rotas Públicas:** `/` (Autenticação e cadastro com atalhos para teste).
-- **Rotas Autenticadas (Tabs):** `/home` (`index.tsx`, `scan.tsx`, `companies.tsx`, `profile.tsx`, `logout.tsx`).
+- **Rotas Autenticadas (Tabs):** `/home` (`index.tsx`, `scan.tsx`, `conversas.tsx`, `companies.tsx`, `profile.tsx`).
   - As abas da barra inferior adaptam-se dinamicamente conforme o papel (`role`):
-    - **Estudante:** Vê "Estágios", "Escanear", "Perfil" e "Sair".
-    - **Empresa:** Vê "Vagas", "Conta" e "Sair" (aba de escanear currículo é oculta).
-    - **Coordenação:** Vê "Oportunidades", "Empresas", "Conta" e "Sair" (abre inicialmente na aba de empresas).
+    - **Estudante:** Vê "Estágios", "Escanear", "Conversas" e "Perfil".
+    - **Empresa:** Vê "Vagas" e "Perfil" (abas de escanear currículo e conversas são ocultas).
+    - **Coordenação:** Vê "Oportunidades", "Empresas" e "Perfil".
+    - O logout foi desacoplado da barra de abas e agora é acionado nas Configurações da Conta (`/configuracoes`).
 - **Rotas Administrativas:** `/admin/usuarios` (Protegida por checagem de perfil: apenas `admin` e `superadmin`).
 - **Rotas de Configuração da Conta:** `/configuracoes` (Acessível pelo Avatar do usuário no Header; gerencia o CRUD da conta `User`, foto de perfil e encerramento de sessão).
 - **Rotas de Vagas:** `/vaga/[id]` (Detalhes e inscrição) e `/vaga/form` (Criação de novas vagas).

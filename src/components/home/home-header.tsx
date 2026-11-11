@@ -1,9 +1,8 @@
+import { ROUTES } from '@/constants/routes';
+import { usePerfil } from '@/hooks/use-perfil';
+import { useRouter } from 'expo-router';
 import { Image, Pressable, Text, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
-import { usePerfil } from '@/hooks/use-perfil';
-import { ROUTES } from '@/constants/routes';
 
 export function HomeHeader() {
   const router = useRouter();
@@ -42,11 +41,6 @@ export function HomeHeader() {
                 </Text>
               </View>
             )}
-          </View>
-
-          {/* Mini-badge de engrenagem / configurações */}
-          <View className="absolute -bottom-0.5 -right-0.5 h-4 w-4 rounded-full bg-indigo-600 border border-white dark:border-slate-900 items-center justify-center shadow-xs">
-            <Ionicons name="settings-sharp" size={9} color="#ffffff" />
           </View>
         </Pressable>
 

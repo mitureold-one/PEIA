@@ -51,19 +51,14 @@ export default function HomeLayout() {
       <Tabs.Screen
         name="profile"
         options={{
-          title: role === 'estudante' ? 'Currículo' : 'Conta',
-          tabBarIcon: icon(role === 'estudante' ? 'document-text-outline' : 'person-outline'),
+          title: 'Perfil',
+          tabBarIcon: icon('person-outline'),
         }}
       />
       <Tabs.Screen
         name="logout"
-        options={{ title: 'Sair', tabBarIcon: icon('log-out-outline') }}
-        listeners={{
-          tabPress: (e) => {
-            e.preventDefault();
-            perfilActions.excluir();
-            router.replace(ROUTES.AUTH);
-          },
+        options={{
+          href: null,
         }}
       />
     </Tabs>

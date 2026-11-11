@@ -1,19 +1,15 @@
-import { useState } from 'react';
-import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import {
-  type CurriculoGeral,
-  type FormacaoAcademica,
-  type ExperienciaProfissional,
-  type Habilidade,
-  type GrauAcademico,
-  type StatusFormacao,
-  type ModalidadeTrabalho,
-  type CategoriaHabilidade,
-} from '@/data/curriculo';
-import { curriculoActions, useCurriculoGeral } from '@/hooks/use-curriculo';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  type CategoriaHabilidade,
+  type GrauAcademico,
+  type ModalidadeTrabalho,
+  type StatusFormacao
+} from '@/data/curriculo';
+import { curriculoActions, useCurriculoGeral } from '@/hooks/use-curriculo';
+import { Ionicons } from '@expo/vector-icons';
+import { useState } from 'react';
+import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
 
 export function CurriculoGeralEditor() {
   const curriculo = useCurriculoGeral();
@@ -117,7 +113,6 @@ export function CurriculoGeralEditor() {
     <View className="gap-3 mt-4">
       <View className="flex-row items-center justify-between">
         <View className="flex-row items-center gap-2">
-          <Text className="text-xl">📄</Text>
           <Text className="text-lg font-bold text-slate-900 dark:text-white">
             Meu Currículo Geral
           </Text>
@@ -144,11 +139,10 @@ export function CurriculoGeralEditor() {
             <Pressable
               key={aba.key}
               onPress={() => setSecaoAtiva(aba.key as any)}
-              className={`flex-row items-center gap-1.5 px-3 py-2 rounded-xl border ${
-                ativa
+              className={`flex-row items-center gap-1.5 px-3 py-2 rounded-xl border ${ativa
                   ? 'bg-indigo-600 border-indigo-600'
                   : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800'
-              }`}
+                }`}
             >
               <Ionicons
                 name={aba.icon as any}
@@ -327,15 +321,13 @@ export function CurriculoGeralEditor() {
               <Pressable
                 key={cat}
                 onPress={() => setCategoriaHabilidade(cat)}
-                className={`px-3 py-1.5 rounded-lg border ${
-                  categoriaHabilidade === cat
+                className={`px-3 py-1.5 rounded-lg border ${categoriaHabilidade === cat
                     ? 'bg-indigo-600 border-indigo-600'
                     : 'bg-slate-100 dark:bg-slate-900 border-slate-300 dark:border-slate-800'
-                }`}
+                  }`}
               >
-                <Text className={`text-xs font-semibold capitalize ${
-                  categoriaHabilidade === cat ? 'text-white' : 'text-slate-600 dark:text-slate-300'
-                }`}>
+                <Text className={`text-xs font-semibold capitalize ${categoriaHabilidade === cat ? 'text-white' : 'text-slate-600 dark:text-slate-300'
+                  }`}>
                   {cat === 'tecnica' ? 'Técnica' : cat === 'comportamental' ? 'Comportamental' : 'Ferramenta'}
                 </Text>
               </Pressable>
