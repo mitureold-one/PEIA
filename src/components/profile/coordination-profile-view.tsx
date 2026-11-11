@@ -38,3 +38,4 @@ export function CoordinationProfileView() {
     </View>
   );
 }
+

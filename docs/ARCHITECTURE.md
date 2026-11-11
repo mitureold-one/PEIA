@@ -38,14 +38,14 @@ PEIA/
 │   │   ├── admin/             # Módulo Administrativo (Restrito a Admin e Super Admin)
 │   │   │   ├── _layout.tsx    # Stack de navegação do módulo de administração
 │   │   │   └── usuarios.tsx   # Painel de gestão e cadastro interno hierárquico
+│   │   ├── configuracoes.tsx  # CRUD de dados cadastrais, alteração de foto de perfil e encerramento de conta
 │   │   ├── home/              # Área logada principal (Tabs adaptativas por perfil)
 │   │   │   ├── _layout.tsx    # Configuração das Tabs com exibição dinâmica por persona
 │   │   │   ├── index.tsx      # Feed principal com busca e filtros de vagas
 │   │   │   ├── scan.tsx       # Leitura e extração de currículos (Câmera, Imagem ou PDF)
 │   │   │   ├── conversas.tsx  # Central de feedback de candidaturas, diagnóstico IA e chat
 │   │   │   ├── companies.tsx  # Cadastro local de empresas parceiras (Coordenação/Admin)
-│   │   │   ├── profile.tsx    # Perfil do usuário, currículo, inscrições e atalho admin
-│   │   │   └── logout.tsx     # Handler de encerramento de sessão
+│   │   │   └── profile.tsx    # Perfil modular das subclasses (Estudante, Empresa, Coordenação)
 │   │   └── vaga/              # Rotas dinâmicas e formulários de vagas
 │   │       ├── _layout.tsx    # Stack de navegação de vagas
 │   │       ├── [id].tsx       # Detalhes da vaga, candidatura do aluno e restrições

@@ -28,6 +28,24 @@ Este documento é o **registro oficial e mandatório** de todas as mudanças imp
 
 ## Histórico de Mudanças
 
+### [2026-11-11] - Subtela de Empresas Seguidas (Ordem Alfabética + Busca) via Contador
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Aprimoramento de UX no Perfil do Estudante atendendo à solicitação do usuário:
+  - O componente estático de empresas parceiras foi removido da timeline principal do perfil, limpando a rolagem visual.
+  - O contador "Empresas" na barra de métricas do cabeçalho do aluno (próximo à foto) tornou-se um botão interativo com indicação de toque que abre uma subtela/modal dedicada (`ProfileFollowingCompaniesModal`).
+  - A nova tela lista todas as empresas que o estudante segue ordenadas estritamente em **ordem alfabética (A-Z)**, com barra de **pesquisa em tempo real** por nome ou setor da empresa e ação para deixar de seguir.
+- **Arquivos Alterados / Criados:**
+  - `src/components/profile/profile-following-companies-modal.tsx` (Criado - modal com ordenação alfabética A-Z, campo de busca com clear, lista com badges e ação de seguir/deixar de seguir)
+  - `src/components/profile/profile-student-header.tsx` (Refatorado - contador "Empresas" transformado em gatilho clicável que abre a modal de empresas seguidas)
+  - `src/components/profile/student-profile-view.tsx` (Refatorado - removida a lista estática solta da timeline do perfil)
+  - `src/components/profile/profile-student-following.tsx` (Removido - substituído pelo modal dedicado acessado pelo contador)
+  - `docs/ARCHITECTURE.md` (Modificado)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - Perfil mais limpo e focado no estudante.
+  - Acesso direto e rápido às empresas acompanhadas com busca alfabética instantânea.
+- **Impactos & Observações:** Checagem TypeScript estrita concluída com 0 erros (`npx tsc --noEmit`).
+
 ### [2026-11-11] - Modularização Completa do Perfil e Mural de Avaliações/Recomendações
 - **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
 - **Motivação / Contexto:** Modularização completa da tela de Perfil (`src/app/home/profile.tsx`) e criação do Mural de Recomendações e Avaliações recebidas pelo estudante de empresas parceiras, professores e colegas:

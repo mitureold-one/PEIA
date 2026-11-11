@@ -47,3 +47,4 @@ export const AVALIACOES_INICIAIS: AvaliacaoEstudante[] = [
     data: '15 de Set, 2026',
   },
 ];
+
