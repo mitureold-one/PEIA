@@ -92,6 +92,7 @@ PEIA/
 │   │   ├── ocr.ts             # Interface unificada de extração de texto de currículos
 │   │   ├── ocr.native.ts      # Extração nativa em Android/iOS usando expo-ocr-kit
 │   │   ├── ocr.web.ts         # Extração web usando Tesseract.js e PDF.js
+│   │   ├── file-validators.ts # Validação de arquivos (MIME types, tamanho máx 5MB, extensão)
 │   │   └── validators.ts      # Validadores de e-mail institucional, senha, telefone, etc.
 │   └── global.css             # Importação de diretivas Tailwind do NativeWind
 ├── AGENTS.md                  # Instruções e regras mandatórias para Agentes de IA

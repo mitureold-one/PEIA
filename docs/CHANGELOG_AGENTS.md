@@ -28,6 +28,21 @@ Este documento é o **registro oficial e mandatório** de todas as mudanças imp
 
 ## Histórico de Mudanças
 
+### [2026-11-11] - Subtela de Recorte/Alinhamento de Foto e Validação de Arquivos
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Aprimoramento robusto do fluxo de seleção de foto de perfil no aplicativo PEIA: criação de subtela/modal para recorte, aproximação (zoom) e alinhamento (pan/rotação) do avatar com máscara circular e grid de enquadramento, acompanhado de verificações essenciais de arquivo (tamanho máximo de 5MB, tipos MIME/extensões suportados JPG/PNG/WEBP, prevenção de arquivos vazios/corrompidos e alertas amigáveis).
+- **Arquivos Alterados / Criados:**
+  - `src/utils/file-validators.ts` (Criado - validação e checagem de integridade de arquivos de imagem com limite de 5MB, validação de tipos MIME, extensões e formatação legível de tamanho)
+  - `src/components/profile/profile-image-crop-modal.tsx` (Criado - subtela/modal em tela cheia com viewport circular, PanResponder para arrasto suave, zoom regulável até 3x, rotação 90°, linhas-guia dos terços, badge de arquivo validado e recorte em alta resolução)
+  - `src/components/profile/profile-avatar.tsx` (Refatorado - integrado ao pipeline de validação de arquivo, modal de recorte e exibição de alertas via `AlertModal`)
+  - `docs/ARCHITECTURE.md` (Modificado - adicionado `file-validators.ts` à estrutura de utilitários)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - Ao escolher uma foto da galeria do aparelho, o arquivo é imediatamente validado contra limites de tamanho (máx 5MB), existência e extensões permitidas. Arquivos inválidos exibem alerta informativo sem travar o app.
+  - Se aprovado, uma subtela dedicada de ajuste é aberta, permitindo centralizar o rosto, arrastar com o dedo, regular zoom (1x a 3x com botões e presets) e rotacionar a foto antes da aplicação final.
+  - Processamento limpo com Canvas no Web e compatibilidade com React Native mobile.
+- **Impactos & Observações:** Checagem TypeScript estrita concluída com 0 erros (`npx tsc --noEmit`). Layout no padrão NativeWind v4 e dark mode.
+
 ### [2026-11-11] - Otimização de Hierarquia Visual no Perfil (Superclasse vs Subclasse)
 - **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
 - **Motivação / Contexto:** Melhoria de UX na tela de Perfil aplicando o padrão de Progressive Disclosure: os dados cadastrais da superclasse `User` (Nome, Sobrenome, E-mail, Telefone) foram recolhidos em um card expansível/toggle elegante, dando foco total e imediato às informações da subclasse do estudante (Inscrições e Currículo Geral).

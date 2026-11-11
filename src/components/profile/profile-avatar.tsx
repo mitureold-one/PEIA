@@ -3,6 +3,9 @@ import { Image, Modal, Platform, Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import * as DocumentPicker from 'expo-document-picker';
 import { Button } from '@/components/ui/button';
+import { AlertModal, AlertState } from '@/components/ui/alert-modal';
+import { validateImageFile } from '@/utils/file-validators';
+import { ProfileImageCropModal } from './profile-image-crop-modal';
 
 interface ProfileAvatarProps {
   avatar?: string;
@@ -45,13 +48,28 @@ export function ProfileAvatar({
   const [modalVisible, setModalVisible] = useState(false);
   const [carregando, setCarregando] = useState(false);
 
+  // Estado para subtela de corte e alinhamento
+  const [cropData, setCropData] = useState<{
+    uri: string;
+    fileName?: string;
+    fileSizeFormatted?: string;
+  } | null>(null);
+
+  // Estado para alertas e feedback de validação de arquivo
+  const [alert, setAlert] = useState<AlertState>({
+    visible: false,
+    variant: 'error',
+    title: '',
+    message: '',
+  });
+
   const iniciais = `${name ? name[0] : 'U'}${surname ? surname[0] : ''}`.toUpperCase();
 
   const escolherDaGaleria = async () => {
     try {
       setCarregando(true);
       const result = await DocumentPicker.getDocumentAsync({
-        type: ['image/*'],
+        type: ['image/jpeg', 'image/png', 'image/webp'],
         copyToCacheDirectory: true,
         base64: Platform.OS === 'web',
       });
@@ -59,15 +77,44 @@ export function ProfileAvatar({
       if (result.canceled || !result.assets || !result.assets[0]) return;
 
       const file = result.assets[0];
+
+      // Verificações e validações de integridade do arquivo
+      const validation = validateImageFile({
+        name: file.name,
+        size: file.size,
+        mimeType: file.mimeType,
+        uri: file.uri,
+      });
+
+      if (!validation.valid) {
+        setAlert({
+          visible: true,
+          variant: 'error',
+          title: 'Arquivo Não Aceito',
+          message: validation.error || 'O arquivo selecionado não é válido.',
+        });
+        return;
+      }
+
       const selectedUri =
         Platform.OS === 'web' && file.base64
           ? `data:${file.mimeType || 'image/jpeg'};base64,${file.base64}`
           : file.uri;
 
-      onUpdateAvatar(selectedUri);
+      // Fecha modal de opções e abre a subtela de corte e enquadramento
       setModalVisible(false);
+      setCropData({
+        uri: selectedUri,
+        fileName: file.name,
+        fileSizeFormatted: validation.formattedSize,
+      });
     } catch {
-      // Ignora cancelamento
+      setAlert({
+        visible: true,
+        variant: 'error',
+        title: 'Erro ao Abrir Imagem',
+        message: 'Não foi possível carregar a imagem selecionada. Tente novamente.',
+      });
     } finally {
       setCarregando(false);
     }
@@ -81,6 +128,15 @@ export function ProfileAvatar({
   const removerFoto = () => {
     onRemoveAvatar();
     setModalVisible(false);
+  };
+
+  const confirmarRecorte = (croppedUri: string) => {
+    onUpdateAvatar(croppedUri);
+    setCropData(null);
+  };
+
+  const cancelarRecorte = () => {
+    setCropData(null);
   };
 
   return (
@@ -134,9 +190,9 @@ export function ProfileAvatar({
               </Pressable>
             </View>
 
-            {/* Opção 1: Escolher arquivo da galeria */}
+            {/* Opção 1: Escolher arquivo da galeria com corte & validação */}
             <Button
-              title={carregando ? 'Carregando foto…' : 'Escolher foto do aparelho'}
+              title={carregando ? 'Processando arquivo…' : 'Escolher foto do aparelho'}
               icon={<Ionicons name="images-outline" size={20} color="#fff" />}
               disabled={carregando}
               onPress={escolherDaGaleria}
@@ -183,7 +239,25 @@ export function ProfileAvatar({
           </Pressable>
         </Pressable>
       </Modal>
+
+      {/* Subtela / Modal de Recorte e Alinhamento */}
+      <ProfileImageCropModal
+        visible={!!cropData}
+        imageUri={cropData?.uri || null}
+        fileName={cropData?.fileName}
+        fileSizeFormatted={cropData?.fileSizeFormatted}
+        onCancel={cancelarRecorte}
+        onConfirm={confirmarRecorte}
+      />
+
+      {/* Alerta de Erro de Validação de Arquivo */}
+      <AlertModal
+        visible={alert.visible}
+        variant={alert.variant}
+        title={alert.title}
+        message={alert.message}
+        onClose={() => setAlert((prev) => ({ ...prev, visible: false }))}
+      />
     </>
   );
 }
-
