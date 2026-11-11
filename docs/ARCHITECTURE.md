@@ -78,6 +78,7 @@ PEIA/
 │   │   ├── use-user-role.ts   # Papel ativo no protótipo (estudante, empresa, coordenacao)
 │   │   ├── use-vagas.ts       # Store global reativo de vagas integrado ao vagasService
 │   │   ├── use-curriculo.ts   # Store global reativo do currículo geral e currículos direcionados de vagas
+│   │   ├── use-avaliacoes.ts  # Store reativo do mural de recomendações e feedbacks de empresas e docentes
 │   │   ├── use-estudante-social.ts # Store de interesses, empresas seguidas e conexões sociais do estudante
 │   │   ├── use-perfil.ts      # Store global reativo do perfil da sessão ativa
 │   │   ├── use-empresas.ts    # Store de empresas parceiras cadastradas

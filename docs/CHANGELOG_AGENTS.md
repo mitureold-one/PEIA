@@ -28,6 +28,26 @@ Este documento é o **registro oficial e mandatório** de todas as mudanças imp
 
 ## Histórico de Mudanças
 
+### [2026-11-11] - Modularização Completa do Perfil e Mural de Avaliações/Recomendações
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Modularização completa da tela de Perfil (`src/app/home/profile.tsx`) e criação do Mural de Recomendações e Avaliações recebidas pelo estudante de empresas parceiras, professores e colegas:
+  - `profile.tsx` foi desacoplado em componentes orquestradores de montagem pura por persona: `StudentProfileView`, `CompanyProfileView` e `CoordinationProfileView`, reduzindo a tela principal para apenas 32 linhas.
+  - Implementação do Mural de Recomendações (`ProfileStudentWall`) com notas em estrelas (1 a 5), filtros por tipo de avaliador (Empresas, Docentes e Colegas), exibição de depoimentos em cartões refinados e modal para cadastrar/solicitar novas avaliações com persistência reativa via `useAvaliacoes`.
+- **Arquivos Alterados / Criados:**
+  - `src/data/avaliacoes.ts` (Criado - entidade, tipos e dados iniciais demonstrativos de avaliações e depoimentos)
+  - `src/hooks/use-avaliacoes.ts` (Criado - store reativo com persistência AsyncStorage para mural de avaliações e recomendações)
+  - `src/components/profile/profile-student-wall.tsx` (Criado - componente de mural com estrelas, média ponderada, filtros e modal de adição de depoimento)
+  - `src/components/profile/student-profile-view.tsx` (Criado - montagem modular de alto nível para o Estudante: Header, Mural, Interesses, Empresas, Inscrições e Currículo Master)
+  - `src/components/profile/company-profile-view.tsx` (Criado - montagem modular de alto nível para Empresas Parceiras)
+  - `src/components/profile/coordination-profile-view.tsx` (Criado - montagem modular de alto nível para Coordenação)
+  - `src/app/home/profile.tsx` (Refatorado - orquestração limpa e declarativa com seleção modular por papel de usuário)
+  - `docs/ARCHITECTURE.md` (Modificado)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - O perfil do estudante agora conta com prova social de alta credibilidade (depoimentos de recrutadores, professores e colegas), facilitando o processo de contratação e visibilidade.
+  - Arquitetura limpa e escalável onde cada persona possui seu módulo de montagem isolado.
+- **Impactos & Observações:** Checagem TypeScript estrita concluída com 0 erros (`npx tsc --noEmit`).
+
 ### [2026-11-11] - Refatoração do Perfil: Foto, Interesses, Conexões e Remoção do Logout da Tab Bar
 - **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
 - **Motivação / Contexto:** Aprimoramento visual e funcional da tela de Perfil (`/home/profile`) e simplificação do menu inferior (Tabs):
