@@ -28,6 +28,16 @@ Este documento é o **registro oficial e mandatório** de todas as mudanças imp
 
 ## Histórico de Mudanças
 
+### [2026-11-11] - Reversão do Redesign de Header para o Layout Anterior Estável
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Reversão imediata a pedido do usuário do commit `6b41ea4`: restauração do layout anterior estável do `ProfileStudentHeader` (foto circular centralizada e barra de 3 contadores horizontais com o modal genérico centralizado com blur) e restauração do componente `ProfileInscricoesList`.
+- **Arquivos Alterados / Criados:**
+  - `src/components/profile/profile-student-header.tsx` (Restaurado ao layout circular e contadores horizontais)
+  - `src/components/profile/student-profile-view.tsx` (Restaurada montagem anterior)
+  - `src/components/profile/profile-inscricoes-list.tsx` (Restaurado)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Impactos & Observações:** Checagem TypeScript estrita concluída com 0 erros (`npx tsc --noEmit`).
+
 ### [2026-11-11] - Modal Genérico Centralizado com Blur para Métricas (Inscrições, Empresas, Conexões)
 - **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
 - **Motivação / Contexto:** Unificação arquitetural e refinamento visual de UX na tela de Perfil do Estudante atendendo à solicitação do usuário:
