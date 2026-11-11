@@ -1,40 +1,61 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useSyncExternalStore } from 'react';
+import { usePerfil, perfilActions } from '@/hooks/use-perfil';
+import type { UserRole as DomainRole } from '@/data/user';
 
 export type UserRole = 'empresa' | 'estudante' | 'coordenacao';
+
 export const USER_ROLES: { value: UserRole; label: string }[] = [
   { value: 'estudante', label: 'Estudante' },
   { value: 'empresa', label: 'Empresa' },
   { value: 'coordenacao', label: 'Coordenação' },
 ];
 
-const KEY = 'peia:tipo-usuario';
-let role: UserRole = 'estudante';
-const listeners = new Set<() => void>();
+/**
+ * Converte a role de domínio (aluno, empresa, admin, superadmin) para o papel de interface do protótipo.
+ */
+export function mapDomainRoleToUserRole(role?: DomainRole): UserRole {
+  if (role === 'empresa') return 'empresa';
+  if (role === 'admin' || role === 'superadmin') return 'coordenacao';
+  return 'estudante';
+}
 
-if (typeof window !== 'undefined') {
-  AsyncStorage.getItem(KEY).then((value) => {
-    if (value === 'empresa' || value === 'estudante' || value === 'coordenacao') {
-      role = value;
-      listeners.forEach((listener) => listener());
-    }
-  });
+/**
+ * Hook que retorna o papel de interface derivado diretamente da sessão ativa (usePerfil).
+ * Garante fonte única da verdade sem duplicar estado no AsyncStorage.
+ */
+export function useUserRole(): UserRole {
+  const perfil = usePerfil();
+  return mapDomainRoleToUserRole(perfil?.role);
+}
+
+/**
+ * Permissões detalhadas baseadas na persona autenticada no banco/sessão.
+ */
+export function usePermissions() {
+  const perfil = usePerfil();
+  const rawRole: DomainRole = perfil?.role ?? 'aluno';
+  const role = mapDomainRoleToUserRole(rawRole);
+
+  return {
+    rawRole,
+    role,
+    isAluno: rawRole === 'aluno',
+    isEmpresa: rawRole === 'empresa',
+    isAdmin: rawRole === 'admin' || rawRole === 'superadmin',
+    isSuperAdmin: rawRole === 'superadmin',
+    canCreateVaga: rawRole === 'empresa' || rawRole === 'admin' || rawRole === 'superadmin',
+    canManageVagas: rawRole === 'empresa' || rawRole === 'admin' || rawRole === 'superadmin',
+    canApply: rawRole === 'aluno',
+    canManageUsers: rawRole === 'admin' || rawRole === 'superadmin',
+  };
 }
 
 export const userRoleActions = {
   definir: (next: UserRole) => {
-    role = next;
-    listeners.forEach((listener) => listener());
-    void AsyncStorage.setItem(KEY, next);
+    const active = perfilActions.obter();
+    if (active) {
+      const mappedRole: DomainRole =
+        next === 'empresa' ? 'empresa' : next === 'coordenacao' ? 'admin' : 'aluno';
+      perfilActions.editar({ ...active, role: mappedRole });
+    }
   },
 };
-
-export function useUserRole() {
-  return useSyncExternalStore(
-    (listener) => {
-      listeners.add(listener);
-      return () => listeners.delete(listener);
-    },
-    () => role,
-  );
-}

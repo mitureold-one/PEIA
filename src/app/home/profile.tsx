@@ -138,7 +138,7 @@ export default function Profile() {
         ) : vagas.filter((vaga) => inscricoes.includes(vaga.id)).map((vaga) => (
           <Pressable
             key={vaga.id}
-            onPress={() => router.push({ pathname: '/vaga/[id]', params: { id: vaga.id } })}
+            onPress={() => router.push({ pathname: ROUTES.VAGA_DETALHE as any, params: { id: vaga.id } })}
             accessibilityRole="button"
             className="gap-1 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950/60"
           >

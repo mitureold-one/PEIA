@@ -14,6 +14,9 @@ export const ROUTES = {
   // Aba de Escaneamento de Currículo (src/app/home/scan.tsx)
   SCAN: '/home/scan',
 
+  // Aba de Cadastro de Empresas Parceiras (src/app/home/companies.tsx)
+  COMPANIES: '/home/companies',
+
   // Aba de Perfil do Usuário (src/app/home/profile.tsx)
   PROFILE: '/home/profile',
 

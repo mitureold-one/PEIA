@@ -1,5 +1,8 @@
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useSyncExternalStore } from 'react';
+import { Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { userService } from '@/services/user-service';
+import { User } from '@/data/user';
 
 export interface EmpresaCadastrada {
   id: string;
@@ -7,22 +10,40 @@ export interface EmpresaCadastrada {
   email: string;
 }
 
-const KEY = 'peia:empresas';
+const STORAGE_KEY = 'peia:empresas_cache';
 let empresas: EmpresaCadastrada[] = [];
 const listeners = new Set<() => void>();
 
-if (typeof window !== 'undefined') {
-  AsyncStorage.getItem(KEY).then((value) => {
-    if (value) empresas = JSON.parse(value);
-    listeners.forEach((listener) => listener());
-  });
-}
+const notify = () => listeners.forEach((l) => l());
 
-const commit = (next: EmpresaCadastrada[]) => {
-  empresas = next;
-  listeners.forEach((listener) => listener());
-  void AsyncStorage.setItem(KEY, JSON.stringify(next));
+const syncFromUserService = async () => {
+  try {
+    const allUsers = await userService.listAll();
+    const companyUsers = allUsers.filter((u) => u.role === 'empresa');
+    empresas = companyUsers.map((u) => ({
+      id: u.id,
+      nome: u.fullName || u.name,
+      email: u.email,
+    }));
+    notify();
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(empresas));
+  } catch {
+    try {
+      const cached = await AsyncStorage.getItem(STORAGE_KEY);
+      if (cached) {
+        empresas = JSON.parse(cached);
+        notify();
+      }
+    } catch {
+      // Ignora erro de leitura de cache
+    }
+  }
 };
+
+// Hidratação segura compatível com native e web
+if (Platform.OS !== 'web' || typeof window !== 'undefined') {
+  void syncFromUserService();
+}
 
 export function useEmpresas() {
   return useSyncExternalStore(
@@ -35,6 +56,21 @@ export function useEmpresas() {
 }
 
 export const empresasActions = {
-  criar: (dados: Omit<EmpresaCadastrada, 'id'>) =>
-    commit([{ ...dados, id: Date.now().toString() }, ...empresas]),
+  criar: async (dados: Omit<EmpresaCadastrada, 'id'>) => {
+    // 1. Instanciação e persistência do usuário Empresa no SQLite via userService
+    const newUser = User.create({
+      name: dados.nome.trim(),
+      surname: 'Empresa',
+      email: dados.email.trim(),
+      role: 'empresa',
+      password: 'password123',
+    });
+    await userService.save(newUser);
+
+    // 2. Atualização do store reativo
+    empresas = [{ id: newUser.id, nome: dados.nome.trim(), email: dados.email.trim() }, ...empresas];
+    notify();
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(empresas));
+  },
+  recarregar: syncFromUserService,
 };

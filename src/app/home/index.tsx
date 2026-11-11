@@ -4,9 +4,10 @@ import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Input } from '@/components/ui/input';
+import { ROUTES } from '@/constants/routes';
 import { AREAS, MODALIDADES } from '@/data/vagas';
 import { useVagas } from '@/hooks/use-vagas';
-import { useUserRole } from '@/hooks/use-user-role';
+import { usePermissions } from '@/hooks/use-user-role';
 
 function Chip({ label, active, onPress }: { label: string; active: boolean; onPress: () => void }) {
   return (
@@ -28,7 +29,7 @@ function Chip({ label, active, onPress }: { label: string; active: boolean; onPr
 export default function Feed() {
   const router = useRouter();
   const todas = useVagas();
-  const role = useUserRole();
+  const { role, canCreateVaga } = usePermissions();
   const [query, setQuery] = useState('');
   const [area, setArea] = useState<string | null>(null);
   const [modalidade, setModalidade] = useState<string | null>(null);
@@ -62,14 +63,16 @@ export default function Feed() {
               <Text className="text-2xl font-bold text-slate-900 dark:text-white">
                 {role === 'empresa' ? 'Vagas anunciadas' : role === 'coordenacao' ? 'Oportunidades' : 'Encontre seu estágio'}
               </Text>
-              {role === 'empresa' && <Pressable
-                onPress={() => router.push('/vaga/form')}
-                accessibilityRole="button"
-                accessibilityLabel="Nova vaga"
-                className="h-10 w-10 items-center justify-center rounded-full bg-indigo-600 active:bg-indigo-700"
-              >
-                <Ionicons name="add" size={24} color="#fff" />
-              </Pressable>}
+              {canCreateVaga && (
+                <Pressable
+                  onPress={() => router.push(ROUTES.VAGA_FORM as any)}
+                  accessibilityRole="button"
+                  accessibilityLabel="Nova vaga"
+                  className="h-10 w-10 items-center justify-center rounded-full bg-indigo-600 active:bg-indigo-700"
+                >
+                  <Ionicons name="add" size={24} color="#fff" />
+                </Pressable>
+              )}
             </View>
             <Text className="text-sm text-slate-500 dark:text-slate-400">
               {role === 'empresa'
@@ -104,7 +107,7 @@ export default function Feed() {
         }
         renderItem={({ item }) => (
           <Pressable
-            onPress={() => router.push({ pathname: '/vaga/[id]', params: { id: item.id } })}
+            onPress={() => router.push({ pathname: ROUTES.VAGA_DETALHE as any, params: { id: item.id } })}
             accessibilityRole="button"
             className={`gap-1.5 rounded-2xl border border-slate-200 bg-white p-4 active:opacity-80 dark:border-slate-800 dark:bg-slate-950/60 ${
               item.arquivada ? 'opacity-60' : ''

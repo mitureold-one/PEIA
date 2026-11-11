@@ -225,7 +225,7 @@ export function useAuthForm(isSignUp: boolean) {
             : 'coordenacao';
         userRoleActions.definir(targetRole);
         if (targetRole === 'coordenacao') {
-          router.replace('/home/companies' as any);
+          router.replace(ROUTES.COMPANIES);
         } else {
           router.replace(ROUTES.HOME);
         }

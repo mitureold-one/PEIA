@@ -28,6 +28,27 @@ Este documento é o **registro oficial e mandatório** de todas as mudanças imp
 
 ## Histórico de Mudanças
 
+### [2026-11-11] - Refatoração Arquitetural e Desacoplamento de Estados Paralelos
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Adequação estrita do código aos padrões de arquitetura do PEIA, corrigindo desvios introduzidos anteriormente como duplicação de papéis/armazenamento, quebra da camada de serviços, bloqueios arbitrários em vagas e uso de strings de rotas hardcoded.
+- **Arquivos Alterados / Criados:**
+  - `src/hooks/use-user-role.ts` (Refatorado - agora deriva o papel diretamente da sessão única `usePerfil`, eliminando a chave isolada `peia:tipo-usuario`; adicionado helper `usePermissions`)
+  - `src/hooks/use-empresas.ts` (Refatorado - integrado ao `userService` e entidade de domínio `User` com persistência no SQLite)
+  - `src/hooks/use-inscricoes.ts` (Refatorado - hidratação corrigida para ambientes nativos Android/iOS além de web; adicionada ação de cancelamento de candidatura)
+  - `src/constants/routes.ts` (Modificado - adicionada a rota `COMPANIES: '/home/companies'`)
+  - `src/app/vaga/[id].tsx` (Refatorado - restauradas permissões para empresas e coordenação gerenciarem vagas: editar, arquivar e excluir; inscrição restrita para alunos)
+  - `src/app/vaga/form.tsx` (Refatorado - restaurado suporte completo a criação e edição de vagas via `existente` e `vagasActions.editar`, com proteção de acesso via `usePermissions` e uso de `ROUTES`)
+  - `src/app/home/companies.tsx` (Refatorado - integrado ao `userService` com cadastro assíncrono real no SQLite e atalho para o painel de gestão)
+  - `src/app/home/index.tsx` (Refatorado - rotas centralizadas via `ROUTES` e permissão de nova vaga ajustada)
+  - `src/app/home/profile.tsx` (Refatorado - rota de detalhes tipada via `ROUTES.VAGA_DETALHE`)
+  - `src/hooks/use-auth-form.ts` (Refatorado - uso de `ROUTES.COMPANIES`)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - Unificação de todos os papéis e estados na Single Source of Truth (`usePerfil` / `userService`).
+  - Restabelecimento do ciclo de vida completo de vagas para empresas e gestão.
+  - Eliminação de rotas hardcoded e garantia de compatibilidade com SSR e runtime nativo mobile.
+- **Impactos & Observações:** Validação de tipos aprovada (`npx tsc --noEmit` com 0 erros). Sistema 100% alinhado à arquitetura oficial.
+
 ### [2026-11-11] - Unificação de Acessos Rápidos na Tela de Autenticação
 - **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
 - **Motivação / Contexto:** Existiam dois blocos concorrentes de seleção/acesso rápido na tela de login: o seletor de pills "Entrar como" (trazido na branch do Tiago) e a barra de atalhos rápidos de apresentação com preenchimento de credenciais SQLite.
