@@ -28,6 +28,18 @@ Este documento é o **registro oficial e mandatório** de todas as mudanças imp
 
 ## Histórico de Mudanças
 
+### [2026-11-11] - Otimização de Hierarquia Visual no Perfil (Superclasse vs Subclasse)
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Melhoria de UX na tela de Perfil aplicando o padrão de Progressive Disclosure: os dados cadastrais da superclasse `User` (Nome, Sobrenome, E-mail, Telefone) foram recolhidos em um card expansível/toggle elegante, dando foco total e imediato às informações da subclasse do estudante (Inscrições e Currículo Geral).
+- **Arquivos Alterados / Criados:**
+  - `src/components/profile/profile-personal-data-form.tsx` (Refatorado - transformado em acordeom expansível com prévia dos dados, chip de ação e expansão fluida)
+  - `src/app/home/profile.tsx` (Refatorado - reposicionados os módulos de subclasse no topo do fluxo visual do estudante, configurando `defaultExpanded` condicional)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - O estudante agora visualiza imediatamente suas candidaturas ativas e todo o editor de currículo mestre (resumo, formações, experiências, habilidades, projetos) sem precisar rolar campos cadastrais estáticos.
+  - Informações cadastrais de contato permanecem facilmente acessíveis a um toque através do botão "Editar" do acordeom.
+- **Impactos & Observações:** Checagem TypeScript estrita concluída com 0 erros (`npx tsc --noEmit`). Redução significativa do esforço cognitivo e rolagem desnecessária.
+
 ### [2026-11-11] - Melhoria de UX no Perfil com Foto de Usuário e Gestor de Avatares
 - **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
 - **Motivação / Contexto:** Aprimoramento da experiência visual e identificação pessoal no Perfil, adicionando suporte completo a foto de perfil/avatar para estudantes, empresas e administradores, com seleção de galeria, avatares rápidos e persistência no SQLite.

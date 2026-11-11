@@ -37,22 +37,23 @@ export default function Profile() {
         {/* Atalho para o painel administrativo (Admin e Super Admin) */}
         <ProfileAdminCard perfil={perfil} />
 
-        {/* Formulário de dados pessoais e contato */}
-        <ProfilePersonalDataForm
-          dados={dados}
-          errors={errors}
-          saved={saved}
-          onChangeField={handleChange}
-          onSave={save}
-        />
-
-        {/* Módulos exclusivos da persona Estudante */}
+        {/* Módulos de subclasse em primeiro plano (Inscrições e Currículo do Estudante) */}
         {role === 'estudante' && (
           <>
             <ProfileInscricoesList />
             <CurriculoGeralEditor />
           </>
         )}
+
+        {/* Informações da superclasse User (Recolhidas em Toggle expansível) */}
+        <ProfilePersonalDataForm
+          dados={dados}
+          errors={errors}
+          saved={saved}
+          onChangeField={handleChange}
+          onSave={save}
+          defaultExpanded={role !== 'estudante'}
+        />
 
         {/* Ação de encerramento/exclusão de conta */}
         <ProfileDangerZone onExcluir={confirmarExclusao} />
