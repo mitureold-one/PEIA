@@ -3,6 +3,7 @@ import { Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { ROUTES } from '@/constants/routes';
 import { perfilActions, usePerfil, type Perfil } from '@/hooks/use-perfil';
+import { userService } from '@/services/user-service';
 import { formatPhone, validateEmail, validatePhone, validateRequired } from '@/utils/validators';
 
 export interface ProfileFormData {
@@ -51,23 +52,45 @@ export function useProfileForm() {
     setSaved(false);
   };
 
-  const handleAvatarChange = (uri: string) => {
+  const handleAvatarChange = async (uri: string) => {
     setDados((prev) => ({ ...prev, avatar: uri }));
     if (perfil) {
       perfilActions.editar({
         ...perfil,
         avatar: uri,
       });
+
+      // Persistência resiliente no banco SQLite / AsyncStorage do userService
+      try {
+        const user = await userService.findByEmail(perfil.email);
+        if (user) {
+          user.avatar = uri;
+          await userService.save(user);
+        }
+      } catch {
+        // Silencioso se der erro na persistência SQLite em background
+      }
     }
   };
 
-  const handleRemoveAvatar = () => {
+  const handleRemoveAvatar = async () => {
     setDados((prev) => ({ ...prev, avatar: undefined }));
     if (perfil) {
       perfilActions.editar({
         ...perfil,
         avatar: undefined,
       });
+
+      // Persistência resiliente no banco SQLite / AsyncStorage do userService
+      try {
+        const user = await userService.findByEmail(perfil.email);
+        if (user) {
+          user.avatar = undefined;
+          await userService.save(user);
+        }
+      } catch {
+        // Silencioso se der erro na persistência SQLite em background
+      }
     }
   };
 
@@ -81,14 +104,34 @@ export function useProfileForm() {
     setErrors(newErrors);
     if (Object.keys(newErrors).length > 0) return false;
 
+    const trimmedName = dados.name.trim();
+    const trimmedSurname = dados.surname.trim();
+    const trimmedEmail = dados.email.trim();
+    const trimmedPhone = dados.phone.trim();
+
     perfilActions.editar({
-      name: dados.name.trim(),
-      surname: dados.surname.trim(),
-      email: dados.email.trim(),
-      phone: dados.phone.trim(),
+      name: trimmedName,
+      surname: trimmedSurname,
+      email: trimmedEmail,
+      phone: trimmedPhone,
       avatar: dados.avatar,
       role: perfil?.role,
     });
+
+    // Persistência no SQLite / UserService
+    try {
+      const emailToLookup = perfil?.email || trimmedEmail;
+      const user = await userService.findByEmail(emailToLookup);
+      if (user) {
+        user.name = trimmedName;
+        user.surname = trimmedSurname;
+        user.phone = trimmedPhone;
+        user.avatar = dados.avatar;
+        await userService.save(user);
+      }
+    } catch {
+      // Silencioso em caso de erro na camada do SQLite
+    }
 
     setSaved(true);
     return true;

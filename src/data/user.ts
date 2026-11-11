@@ -52,6 +52,7 @@ export class User {
     phone?: string;
     password?: string;
     role?: UserRole;
+    avatar?: string;
   }): User {
     return new User(props);
   }

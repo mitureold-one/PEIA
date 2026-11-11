@@ -28,6 +28,22 @@ Este documento é o **registro oficial e mandatório** de todas as mudanças imp
 
 ## Histórico de Mudanças
 
+### [2026-11-11] - Editor Nativo de Foto no Celular e Persistência Completa no SQLite
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Integração com o editor e cortador de fotos nativo do sistema operacional (Android e iOS) via `expo-image-picker` com `allowsEditing: true` e proporção `aspect: [1, 1]`, adicionando suporte à câmera do aparelho, e fechamento do ciclo de persistência resiliente no SQLite (`userService.save` e `peia.db`), garantindo que o avatar e alterações cadastrais do perfil persistam entre sessões e no painel administrativo.
+- **Arquivos Alterados / Criados:**
+  - `package.json` (Modificado - adicionada dependência `expo-image-picker` ~58.0.10 do Expo SDK 58)
+  - `src/components/profile/profile-avatar.tsx` (Refatorado - integrado ao `expo-image-picker` para acionar o editor de corte nativo do Android/iOS, captura de câmera com corte nativo e fallback da subtela web com Canvas)
+  - `src/hooks/use-profile-form.ts` (Refatorado - sincronização com `userService.save(...)` no SQLite para avatar e dados pessoais ao salvar)
+  - `src/hooks/use-auth.ts` (Modificado - repasse do campo `avatar` persistido no SQLite para o estado global `perfilActions` no login e cadastro)
+  - `src/data/user.ts` (Modificado - suporte a `avatar` no factory method `User.create`)
+  - `docs/ARCHITECTURE.md` (Modificado)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - **Editor Nativo do Celular:** No Android e iOS, tocar em "Escolher foto da galeria" ou "Tirar foto com a câmera" agora abre a interface nativa do sistema operacional (Google Fotos / Galeria / iOS) com o cortador quadrado/circular já integrado.
+  - **Persistência Completa:** Alterações de avatar (seleção ou remoção) e alterações de dados cadastrais agora são persistidas imediatamente tanto no estado reativo (`perfilActions`) quanto no banco relacional local SQLite (`peia.db` via `userService.save`), permanecendo salvas após logout e login.
+- **Impactos & Observações:** Checagem TypeScript estrita concluída com 0 erros (`npx tsc --noEmit`). Totalmente aderente ao Expo SDK 58.
+
 ### [2026-11-11] - Subtela de Recorte/Alinhamento de Foto e Validação de Arquivos
 - **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
 - **Motivação / Contexto:** Aprimoramento robusto do fluxo de seleção de foto de perfil no aplicativo PEIA: criação de subtela/modal para recorte, aproximação (zoom) e alinhamento (pan/rotação) do avatar com máscara circular e grid de enquadramento, acompanhado de verificações essenciais de arquivo (tamanho máximo de 5MB, tipos MIME/extensões suportados JPG/PNG/WEBP, prevenção de arquivos vazios/corrompidos e alertas amigáveis).

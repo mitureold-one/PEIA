@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Image, Modal, Platform, Pressable, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import * as DocumentPicker from 'expo-document-picker';
+import * as ImagePicker from 'expo-image-picker';
 import { Button } from '@/components/ui/button';
 import { AlertModal, AlertState } from '@/components/ui/alert-modal';
 import { validateImageFile } from '@/utils/file-validators';
@@ -48,7 +48,7 @@ export function ProfileAvatar({
   const [modalVisible, setModalVisible] = useState(false);
   const [carregando, setCarregando] = useState(false);
 
-  // Estado para subtela de corte e alinhamento
+  // Estado para subtela de corte e alinhamento (Web ou fallback)
   const [cropData, setCropData] = useState<{
     uri: string;
     fileName?: string;
@@ -68,9 +68,26 @@ export function ProfileAvatar({
   const escolherDaGaleria = async () => {
     try {
       setCarregando(true);
-      const result = await DocumentPicker.getDocumentAsync({
-        type: ['image/jpeg', 'image/png', 'image/webp'],
-        copyToCacheDirectory: true,
+
+      // Pede permissão para acessar fotos
+      const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+      if (status !== 'granted') {
+        setAlert({
+          visible: true,
+          variant: 'error',
+          title: 'Permissão Necessária',
+          message: 'Conceda acesso à galeria para selecionar uma foto de perfil.',
+        });
+        return;
+      }
+
+      // No mobile nativo, allowsEditing aciona o editor de corte nativo do sistema operacional (Android/iOS)
+      const isMobile = Platform.OS !== 'web';
+      const result = await ImagePicker.launchImageLibraryAsync({
+        mediaTypes: ['images'],
+        allowsEditing: isMobile, // Editor nativo do celular
+        aspect: [1, 1], // Proporção quadrada para avatar
+        quality: 0.85,
         base64: Platform.OS === 'web',
       });
 
@@ -80,9 +97,9 @@ export function ProfileAvatar({
 
       // Verificações e validações de integridade do arquivo
       const validation = validateImageFile({
-        name: file.name,
-        size: file.size,
-        mimeType: file.mimeType,
+        name: file.fileName || 'foto_perfil.jpg',
+        size: file.fileSize,
+        mimeType: file.mimeType || 'image/jpeg',
         uri: file.uri,
       });
 
@@ -96,24 +113,85 @@ export function ProfileAvatar({
         return;
       }
 
-      const selectedUri =
-        Platform.OS === 'web' && file.base64
+      setModalVisible(false);
+
+      if (isMobile) {
+        // No celular nativo, o corte já foi realizado pelo editor nativo do aparelho
+        onUpdateAvatar(file.uri);
+      } else {
+        // Na Web (onde o navegador não possui crop nativo do OS), abre a subtela dedicada de corte
+        const selectedUri = file.base64
           ? `data:${file.mimeType || 'image/jpeg'};base64,${file.base64}`
           : file.uri;
 
-      // Fecha modal de opções e abre a subtela de corte e enquadramento
-      setModalVisible(false);
-      setCropData({
-        uri: selectedUri,
-        fileName: file.name,
-        fileSizeFormatted: validation.formattedSize,
-      });
+        setCropData({
+          uri: selectedUri,
+          fileName: file.fileName || 'foto_perfil.jpg',
+          fileSizeFormatted: validation.formattedSize,
+        });
+      }
     } catch {
       setAlert({
         visible: true,
         variant: 'error',
-        title: 'Erro ao Abrir Imagem',
-        message: 'Não foi possível carregar a imagem selecionada. Tente novamente.',
+        title: 'Erro ao Abrir Foto',
+        message: 'Não foi possível carregar a imagem da galeria. Tente novamente.',
+      });
+    } finally {
+      setCarregando(false);
+    }
+  };
+
+  const tirarFotoComCamera = async () => {
+    try {
+      setCarregando(true);
+
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== 'granted') {
+        setAlert({
+          visible: true,
+          variant: 'error',
+          title: 'Permissão da Câmera',
+          message: 'Conceda permissão de câmera para tirar uma nova foto de perfil.',
+        });
+        return;
+      }
+
+      // Abre câmera do aparelho com editor nativo de corte integrado
+      const result = await ImagePicker.launchCameraAsync({
+        allowsEditing: true, // Editor nativo do celular
+        aspect: [1, 1],
+        quality: 0.85,
+      });
+
+      if (result.canceled || !result.assets || !result.assets[0]) return;
+
+      const file = result.assets[0];
+      const validation = validateImageFile({
+        name: file.fileName || 'foto_camera.jpg',
+        size: file.fileSize,
+        mimeType: file.mimeType || 'image/jpeg',
+        uri: file.uri,
+      });
+
+      if (!validation.valid) {
+        setAlert({
+          visible: true,
+          variant: 'error',
+          title: 'Arquivo Não Aceito',
+          message: validation.error || 'A foto capturada não é válida.',
+        });
+        return;
+      }
+
+      setModalVisible(false);
+      onUpdateAvatar(file.uri);
+    } catch {
+      setAlert({
+        visible: true,
+        variant: 'error',
+        title: 'Erro na Câmera',
+        message: 'Não foi possível capturar a foto. Verifique as permissões do dispositivo.',
       });
     } finally {
       setCarregando(false);
@@ -190,15 +268,24 @@ export function ProfileAvatar({
               </Pressable>
             </View>
 
-            {/* Opção 1: Escolher arquivo da galeria com corte & validação */}
+            {/* Opção 1: Escolher da galeria com editor nativo */}
             <Button
-              title={carregando ? 'Processando arquivo…' : 'Escolher foto do aparelho'}
+              title={carregando ? 'Abrindo galeria…' : 'Escolher foto da galeria'}
               icon={<Ionicons name="images-outline" size={20} color="#fff" />}
               disabled={carregando}
               onPress={escolherDaGaleria}
             />
 
-            {/* Opção 2: Avatares pré-definidos */}
+            {/* Opção 2: Tirar foto na hora com a câmera */}
+            <Button
+              title="Tirar foto com a câmera"
+              variant="secondary"
+              icon={<Ionicons name="camera-outline" size={20} color="#6366f1" />}
+              disabled={carregando}
+              onPress={tirarFotoComCamera}
+            />
+
+            {/* Opção 3: Avatares pré-definidos */}
             <View className="gap-2">
               <Text className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 Ou escolha um avatar:
@@ -220,7 +307,7 @@ export function ProfileAvatar({
               </View>
             </View>
 
-            {/* Opção 3: Remover foto se já tiver uma */}
+            {/* Opção 4: Remover foto se já tiver uma */}
             {!!avatar && (
               <Button
                 title="Remover foto atual"
@@ -240,7 +327,7 @@ export function ProfileAvatar({
         </Pressable>
       </Modal>
 
-      {/* Subtela / Modal de Recorte e Alinhamento */}
+      {/* Subtela / Modal de Recorte e Alinhamento (Web / Fallback) */}
       <ProfileImageCropModal
         visible={!!cropData}
         imageUri={cropData?.uri || null}

@@ -123,8 +123,8 @@ PEIA/
 Para garantir alta performance em produção sem quebrar o ambiente de desenvolvimento (Expo Go, web ou ambientes onde o módulo nativo C++ não está compilado), o projeto adota uma arquitetura em duas camadas:
 1. **Detecção e Proteção:** Os serviços (`user-service.ts` e `vagas-service.ts`) utilizam `requireOptionalNativeModule('ExpoSQLite')` para verificar previamente se o módulo binário do SQLite está linkado.
 2. **Ambiente com SQLite compilado (Dev Client / APK standalone):**
-   - Cria tabelas relacionais no banco `peia.db` (`users` e `vagas`).
-   - Executa consultas SQL estruturadas com transações seguras.
+   - Cria tabelas relacionais no banco `peia.db` (`users` com suporte a `role` e `avatar`, e `vagas`).
+   - Executa consultas SQL estruturadas com transações seguras e sincronização via `userService.save()`.
 3. **Ambiente sem SQLite compilado (Expo Go genérico / Web):**
    - Redireciona as operações de leitura e escrita silenciosamente para o `@react-native-async-storage/async-storage` sem disparar logs de advertência ou erros não capturados.
 4. **Reatividade na Interface:** O gerenciamento do estado na UI utiliza o hook nativo `useSyncExternalStore`, garantindo atualizações instantâneas de tela sem overhead de bibliotecas pesadas de estado global.

@@ -49,6 +49,7 @@ export function useAuth() {
         email: savedUser.email,
         phone: savedUser.phone ?? '',
         role: savedUser.role,
+        avatar: savedUser.avatar,
       });
 
       return savedUser;
@@ -100,6 +101,7 @@ export function useAuth() {
         email: userToLog.email,
         phone: userToLog.phone ?? '',
         role: userToLog.role,
+        avatar: userToLog.avatar,
       });
 
       return userToLog;

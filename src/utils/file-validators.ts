@@ -100,3 +100,4 @@ export function validateImageFile(file: FileMetadataInput): FileValidationResult
     formattedSize,
   };
 }
+
