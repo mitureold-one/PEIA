@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { HomeHeader } from '@/components/home/home-header';
 import { ROUTES } from '@/constants/routes';
 import { perfilActions } from '@/hooks/use-perfil';
+import { useUserRole } from '@/hooks/use-user-role';
 
 export function ErrorBoundary({ error, retry }: { error: Error; retry: () => void }) {
   return (
@@ -29,6 +30,7 @@ const icon = (name: IconName) =>
 export default function HomeLayout() {
   const router = useRouter();
   const isDark = useColorScheme().colorScheme === 'dark';
+  const role = useUserRole();
 
   return (
     <Tabs
@@ -42,9 +44,10 @@ export default function HomeLayout() {
         },
       }}
     >
-      <Tabs.Screen name="index" options={{ title: 'Feed', tabBarIcon: icon('home') }} />
-      <Tabs.Screen name="scan" options={{ title: 'Escanear', tabBarIcon: icon('scan') }} />
-      <Tabs.Screen name="profile" options={{ title: 'Perfil', tabBarIcon: icon('person') }} />
+      <Tabs.Screen name="index" options={{ title: role === 'estudante' ? 'Estágios' : 'Vagas', tabBarIcon: icon('home') }} />
+      <Tabs.Screen name="scan" options={{ title: 'Escanear', tabBarIcon: icon('scan'), href: role === 'estudante' ? undefined : null }} />
+      <Tabs.Screen name="companies" options={{ title: 'Empresas', tabBarIcon: icon('business'), href: role === 'coordenacao' ? undefined : null }} />
+      <Tabs.Screen name="profile" options={{ title: role === 'estudante' ? 'Perfil' : 'Conta', tabBarIcon: icon('person') }} />
       <Tabs.Screen
         name="logout"
         options={{ title: 'Sair', tabBarIcon: icon('log-out-outline') }}

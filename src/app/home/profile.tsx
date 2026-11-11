@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Alert, ScrollView, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, Text, View } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -7,6 +7,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ROUTES } from '@/constants/routes';
 import { perfilActions, usePerfil } from '@/hooks/use-perfil';
+import { useUserRole } from '@/hooks/use-user-role';
+import { useInscricoes } from '@/hooks/use-inscricoes';
+import { useVagas } from '@/hooks/use-vagas';
 import { formatPhone, validateEmail, validatePhone, validateRequired } from '@/utils/validators';
 
 const STORAGE_KEY = 'peia:resume';
@@ -19,6 +22,9 @@ const EMPTY_PERFIL = { name: '', surname: '', email: '', phone: '' };
 export default function Profile() {
   const router = useRouter();
   const perfil = usePerfil();
+  const role = useUserRole();
+  const inscricoes = useInscricoes();
+  const vagas = useVagas();
   const [dados, setDados] = useState(EMPTY_PERFIL);
   const [errors, setErrors] = useState<Partial<typeof EMPTY_PERFIL>>({});
   const [resume, setResume] = useState<Resume>(EMPTY_RESUME);
@@ -54,7 +60,7 @@ export default function Profile() {
     if (Object.keys(e).length) return;
 
     perfilActions.editar(dados);
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(resume));
+    if (role === 'estudante') await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(resume));
     setSaved(true);
   };
 
@@ -77,7 +83,9 @@ export default function Profile() {
     <SafeAreaView edges={[]} className="flex-1 bg-slate-50 dark:bg-[#03031b]">
       <ScrollView contentContainerClassName="gap-4 p-6" keyboardShouldPersistTaps="handled">
         <View className="flex-row items-center justify-between">
-          <Text className="text-2xl font-bold text-slate-900 dark:text-white">Meu perfil</Text>
+          <Text className="text-2xl font-bold text-slate-900 dark:text-white flex-1 mr-2">
+            {role === 'estudante' ? 'Meu perfil de estudante' : role === 'empresa' ? 'Conta da empresa' : 'Conta da coordenação'}
+          </Text>
           {perfil?.role && (
             <View className="px-2.5 py-1 rounded-full bg-indigo-100 dark:bg-indigo-950/70 border border-indigo-200 dark:border-indigo-800">
               <Text className="text-xs font-semibold text-indigo-700 dark:text-indigo-300">
@@ -93,7 +101,9 @@ export default function Profile() {
           )}
         </View>
         <Text className="text-sm text-slate-500 dark:text-slate-400">
-          Atualize seus dados e monte seu currículo. Tudo fica salvo neste aparelho.
+          {role === 'estudante'
+            ? 'Atualize seus dados, monte seu currículo e acompanhe suas inscrições.'
+            : 'Atualize os dados de contato da sua conta.'} Tudo fica salvo neste aparelho.
         </Text>
 
         {/* Painel Administrativo de Gestão (visível apenas para Admin e Super Admin) */}
@@ -121,11 +131,28 @@ export default function Profile() {
         <Input label="E-mail" value={dados.email} onChangeText={setD('email')} keyboardType="email-address" autoCapitalize="none" errorMessage={errors.email} />
         <Input label="Telefone" value={dados.phone} onChangeText={setD('phone')} keyboardType="phone-pad" errorMessage={errors.phone} />
 
+        {role === 'estudante' && <>
+        <Text className="mt-2 text-base font-semibold text-slate-900 dark:text-white">Minhas inscrições</Text>
+        {inscricoes.length === 0 ? (
+          <Text className="text-sm text-slate-500 dark:text-slate-400">Você ainda não se inscreveu em vagas.</Text>
+        ) : vagas.filter((vaga) => inscricoes.includes(vaga.id)).map((vaga) => (
+          <Pressable
+            key={vaga.id}
+            onPress={() => router.push({ pathname: '/vaga/[id]', params: { id: vaga.id } })}
+            accessibilityRole="button"
+            className="gap-1 rounded-2xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-950/60"
+          >
+            <Text className="font-semibold text-slate-900 dark:text-white">{vaga.titulo}</Text>
+            <Text className="text-sm text-slate-500 dark:text-slate-400">{vaga.empresa} · Inscrição realizada</Text>
+          </Pressable>
+        ))}
+
         <Text className="mt-2 text-base font-semibold text-slate-900 dark:text-white">Currículo</Text>
         <Input label="Resumo profissional" value={resume.summary} onChangeText={setR('summary')} {...multiline} />
         <Input label="Experiência" value={resume.experience} onChangeText={setR('experience')} {...multiline} />
         <Input label="Formação" value={resume.education} onChangeText={setR('education')} {...multiline} />
         <Input label="Habilidades" value={resume.skills} onChangeText={setR('skills')} {...multiline} />
+        </>}
 
         <Button title="Salvar alterações" onPress={save} />
         {saved && <View accessibilityLiveRegion="polite"><Text className="text-center text-sm text-emerald-500">Alterações salvas!</Text></View>}

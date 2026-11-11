@@ -3,6 +3,8 @@ import { useRouter } from 'expo-router';
 import { ROUTES } from '@/constants/routes';
 import { useAuth } from '@/hooks/use-auth';
 import type { UserRole } from '@/data/user';
+import { perfilActions } from '@/hooks/use-perfil';
+import { userRoleActions, useUserRole } from '@/hooks/use-user-role';
 import type { AlertState } from '@/components/ui/alert-modal';
 import {
   formatPhone,
@@ -54,6 +56,7 @@ export function useAuthForm(isSignUp: boolean) {
   // Estados de Login
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+  const userRole = useUserRole();
 
   const clearFieldError = (field: keyof FormErrors) => {
     if (errors[field]) {
@@ -190,6 +193,8 @@ export function useAuthForm(isSignUp: boolean) {
           role,
         });
 
+        userRoleActions.definir(role === 'aluno' ? 'estudante' : role === 'empresa' ? 'empresa' : 'coordenacao');
+
         showAlert(
           'success',
           'Conta criada!',
@@ -211,8 +216,19 @@ export function useAuthForm(isSignUp: boolean) {
 
       setLoading(true);
       try {
-        await auth.signIn(loginEmail, loginPassword);
-        router.replace(ROUTES.HOME);
+        const loggedUser = await auth.signIn(loginEmail, loginPassword);
+        const targetRole =
+          loggedUser.role === 'aluno'
+            ? 'estudante'
+            : loggedUser.role === 'empresa'
+            ? 'empresa'
+            : 'coordenacao';
+        userRoleActions.definir(targetRole);
+        if (targetRole === 'coordenacao') {
+          router.replace('/home/companies' as any);
+        } else {
+          router.replace(ROUTES.HOME);
+        }
       } catch (err: any) {
         const errorMsg = err?.message || 'Falha ao autenticar. Tente novamente.';
         showAlert('error', 'Erro no login', errorMsg);
@@ -247,6 +263,8 @@ export function useAuthForm(isSignUp: boolean) {
     // Campos de Login
     loginEmail,
     loginPassword,
+    userRole,
+    setUserRole: userRoleActions.definir,
     setLoginEmail: handleLoginEmailChange,
     setLoginPassword: handleLoginPasswordChange,
     // Ação do formulário

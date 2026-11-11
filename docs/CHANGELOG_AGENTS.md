@@ -28,6 +28,24 @@ Este documento é o **registro oficial e mandatório** de todas as mudanças imp
 
 ## Histórico de Mudanças
 
+### [2026-11-11] - Sincronização de Branches (scanner-curriculo -> main) e Harmonização de Perfis
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Integração das alterações de fluxos por tipo de usuário enviadas por Tiago na branch `scanner-curriculo` com a branch `main` (que inclui Expo 58, SQLite e tela de gestão de usuários).
+- **Arquivos Alterados / Criados:**
+  - `src/app/home/_layout.tsx` (Modificado - integrado tabs por perfil com ErrorBoundary)
+  - `src/app/home/profile.tsx` (Modificado - títulos adaptativos por role com badges e painel admin)
+  - `src/hooks/use-auth-form.ts` (Modificado - sincronização de credenciais SQLite com userRole)
+  - `src/app/home/companies.tsx` (Integrado - cadastro de empresas da coordenação)
+  - `src/hooks/use-empresas.ts` (Integrado - persistência de empresas parceiras)
+  - `src/hooks/use-inscricoes.ts` (Integrado - registro de candidaturas de estudantes)
+  - `src/hooks/use-user-role.ts` (Integrado - sincronização da persona ativa)
+  - `src/app/vaga/[id].tsx` (Integrado - fluxo de inscrição de estudante e permissões de empresa)
+  - `src/app/vaga/form.tsx` (Integrado - restrição de anúncio exclusivo para empresas)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - Resolução de conflitos de merge entre `main` e `origin/scanner-curriculo`.
+  - Harmonização da entidade `User` e `useAuth` com o `useUserRole`, permitindo que os fluxos do protótipo de Tiago e o sistema de autenticação local SQLite funcionem de forma interoperável.
+- **Impactos & Observações:** Todas as funcionalidades de ambas as branches preservadas. Testado e validado.
 ### [2026-10-30] - Checagem com requireOptionalNativeModule para Prevenir Erro Fatal do Metro
 - **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
 - **Motivação / Contexto:** O Metro interceptava require('expo-sqlite') através do guardedLoadModule e lançava Uncaught Error fatal caso o módulo nativo C++ não estivesse presente no APK em execução.
@@ -301,6 +319,56 @@ outer.replace(ROUTES.HOME) ao clicar no botão.
   - Correção do caminho `ios.icon` em `app.json`.
   - Configuração do perfil `preview` em `eas.json` com `buildType: "apk"` para distribuição interna direta.
 - **Impactos & Observações:** O comando `npx expo config --type public` agora valida sem erros. Pronto para execução do EAS Build.
+
+### [2026-11-09] - Prioriza funções por tipo de usuário
+- **Agente / Autor:** Codex
+- **Motivação / Contexto:** Ajuste solicitado para destacar em cada perfil as tarefas próprias de estudante, empresa e coordenação.
+- **Arquivos Alterados / Criados:**
+  - `src/app/home/_layout.tsx` (Modificado)
+  - `src/app/home/index.tsx` (Modificado)
+  - `src/app/home/profile.tsx` (Modificado)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+  - `docs/ARCHITECTURE.md` (Modificado)
+- **Principais Mudanças:**
+  - O perfil estudante destaca busca de estágio, currículo e inscrições realizadas.
+  - Conta de empresa e coordenação não exibe campos de currículo; empresa vê orientação de publicação e coordenação abre inicialmente o cadastro de empresas.
+  - Abas e títulos do feed e da conta acompanham o papel selecionado.
+- **Impactos & Observações:** Os fluxos continuam usando dados locais do protótipo.
+
+### [2026-11-09] - Separa permissões por tipo de usuário
+- **Agente / Autor:** Codex
+- **Motivação / Contexto:** O fluxo de vagas precisava diferenciar empresa, estudante e coordenação na interface.
+- **Arquivos Alterados / Criados:**
+  - `src/hooks/use-user-role.ts` (Criado)
+  - `src/hooks/use-empresas.ts` (Criado)
+  - `src/hooks/use-inscricoes.ts` (Criado)
+  - `src/components/auth/auth-form.tsx` (Modificado)
+  - `src/hooks/use-auth-form.ts` (Modificado)
+  - `src/app/home/_layout.tsx` (Modificado)
+  - `src/app/home/index.tsx` (Modificado)
+  - `src/app/home/companies.tsx` (Criado)
+  - `src/app/vaga/[id].tsx` (Modificado)
+  - `src/app/vaga/form.tsx` (Modificado)
+  - `docs/ARCHITECTURE.md` (Modificado)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - Login e cadastro permitem selecionar o perfil de demonstração; a escolha fica salva localmente.
+  - Empresas podem publicar novas vagas, sem controles para editar, arquivar ou excluir anúncios existentes; estudantes podem registrar inscrição local.
+  - Coordenação recebe uma aba para cadastrar empresas, com nome e e-mail salvos no dispositivo.
+- **Impactos & Observações:** A autorização e os cadastros são apenas de interface e persistência local. Não substituem autenticação ou autorização no servidor, que ainda não existe no projeto.
+
+### [2026-11-09] - Limita empresa à publicação de vagas
+- **Agente / Autor:** Codex
+- **Motivação / Contexto:** Esclarecimento de que o perfil empresa pode somente anunciar vagas.
+- **Arquivos Alterados / Criados:**
+  - `src/app/vaga/[id].tsx` (Modificado)
+  - `src/app/vaga/form.tsx` (Modificado)
+  - `docs/ARCHITECTURE.md` (Modificado)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - Removidas as ações de edição, arquivamento e exclusão de vaga para empresas.
+  - A rota do formulário aceita apenas novas publicações; tentativa de abrir edição mostra orientação.
+- **Impactos & Observações:** Empresas seguem limitadas à publicação de novas vagas no protótipo.
 
 ### [2026-10-13] - Adiciona leitura de currículos em PDF na web
 - **Agente / Autor:** Codex
