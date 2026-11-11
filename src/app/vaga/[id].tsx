@@ -1,10 +1,15 @@
+import { useState } from 'react';
 import { Alert, ScrollView, Text, View } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Ionicons } from '@expo/vector-icons';
 import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/constants/routes';
 import { useVagas, vagasActions } from '@/hooks/use-vagas';
 import { usePermissions } from '@/hooks/use-user-role';
-import { inscricoesActions, useInscricoes } from '@/hooks/use-inscricoes';
+import { useInscricoes } from '@/hooks/use-inscricoes';
+import { useCurriculoVaga } from '@/hooks/use-curriculo';
+import { ModalCandidaturaVaga } from '@/components/curriculo/modal-candidatura-vaga';
+import { ModalVisualizarCurriculoVaga } from '@/components/curriculo/modal-visualizar-curriculo-vaga';
 
 export default function VagaDetalhe() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -12,6 +17,10 @@ export default function VagaDetalhe() {
   const vaga = useVagas().find((v) => v.id === id);
   const { isAluno, canManageVagas } = usePermissions();
   const inscricoes = useInscricoes();
+  const curriculoVaga = useCurriculoVaga(vaga?.id ?? '');
+
+  const [modalCandidatura, setModalCandidatura] = useState(false);
+  const [modalVisualizar, setModalVisualizar] = useState(false);
 
   if (!vaga) {
     return (
@@ -70,15 +79,58 @@ export default function VagaDetalhe() {
 
       {/* Ação do Estudante */}
       {isAluno && (
-        <Button
-          title={inscricoes.includes(vaga.id) ? 'Inscrição realizada' : 'Inscrever-se na vaga'}
-          disabled={inscricoes.includes(vaga.id)}
-          onPress={() => {
-            inscricoesActions.inscrever(vaga.id);
-            Alert.alert('Inscrição realizada', 'Sua inscrição foi salva com sucesso no seu perfil.');
-          }}
-        />
+        <View className="gap-3">
+          {inscricoes.includes(vaga.id) ? (
+            <View className="p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-900/60 gap-3">
+              <View className="flex-row items-center gap-2">
+                <Ionicons name="checkmark-circle" size={22} color="#4f46e5" />
+                <View className="flex-1">
+                  <Text className="text-sm font-bold text-slate-900 dark:text-white">
+                    Candidatura enviada
+                  </Text>
+                  <Text className="text-xs text-slate-600 dark:text-slate-300">
+                    Seu currículo direcionado foi recebido pela empresa.
+                  </Text>
+                </View>
+              </View>
+              <Button
+                title="Visualizar currículo enviado"
+                variant="secondary"
+                onPress={() => setModalVisualizar(true)}
+              />
+            </View>
+          ) : (
+            <Button
+              title="Candidatar-se com currículo direcionado"
+              onPress={() => setModalCandidatura(true)}
+            />
+          )}
+        </View>
       )}
+
+      {/* Modais de Candidatura e Visualização */}
+      <ModalCandidaturaVaga
+        visible={modalCandidatura}
+        vaga={vaga}
+        onClose={() => setModalCandidatura(false)}
+        onSuccess={() => {
+          setModalCandidatura(false);
+          Alert.alert(
+            'Candidatura enviada!',
+            'Seu currículo direcionado foi enviado com sucesso para a empresa.'
+          );
+        }}
+      />
+
+      <ModalVisualizarCurriculoVaga
+        visible={modalVisualizar}
+        vaga={vaga}
+        curriculoVaga={curriculoVaga}
+        onClose={() => setModalVisualizar(false)}
+        onCancelSuccess={() => {
+          Alert.alert('Candidatura cancelada', 'Sua inscrição foi removida desta vaga.');
+        }}
+      />
 
       {/* Ações de Gestão (Empresa e Administração) */}
       {canManageVagas && (

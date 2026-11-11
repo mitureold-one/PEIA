@@ -28,6 +28,159 @@ Este documento é o **registro oficial e mandatório** de todas as mudanças imp
 
 ## Histórico de Mudanças
 
+### [2026-11-11] - Implementação da Rota de Conversas e Feedbacks de Candidatura
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Criação da funcionalidade central do PEIA de diagnóstico inteligente e feedbacks de candidatura, permitindo que os estudantes visualizem a aderência de seus currículos às vagas inscritas (Match Score), pontos fortes identificados, recomendações para entrevista e conversem diretamente com recrutadores/IA.
+- **Arquivos Alterados / Criados:**
+  - `src/data/feedback.ts` (Criado - tipagem e motor de análise automatizada de compatibilidade de currículo vs vaga `gerarAnaliseAutomatica` e factory `criarConversaInicial`)
+  - `src/services/feedback-service.ts` (Criado - persistência resiliente em SQLite na tabela `conversas_candidaturas` com fallback transparente em AsyncStorage)
+  - `src/hooks/use-conversas.ts` (Criado - hook reativo via `useSyncExternalStore` com envio de mensagens do estudante e auto-resposta assistiva)
+  - `src/components/conversas/conversa-card.tsx` (Criado - card visual no feed com badge de Match Score colorido, título da vaga, empresa e última mensagem)
+  - `src/components/conversas/conversa-detalhe-modal.tsx` (Criado - modal completo com card expansível de diagnóstico do currículo, pontos fortes, oportunidades de melhoria, histórico de mensagens e envio de respostas)
+  - `src/components/conversas/conversas-empty.tsx` (Criado - empty state com CTA para explorar oportunidades)
+  - `src/app/home/conversas.tsx` (Criado - rota da aba de conversas integrada com listagem e modais)
+  - `src/app/home/_layout.tsx` (Modificado - inserida a aba "Conversas" com ícone `chatbubbles` no menu de navegação inferior do estudante)
+  - `src/constants/routes.ts` (Modificado - adicionada a rota `CONVERSAS: '/home/conversas'`)
+  - `docs/ARCHITECTURE.md` (Modificado)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - Inclusão da aba "Conversas" na barra de navegação da Home.
+  - Para cada vaga em que o estudante se candidatou, o sistema calcula a aderência das qualificações (habilidades, experiências, formação) gerando Match Score de 0 a 100%, pontos fortes destacados e dicas específicas para a entrevista com a empresa.
+  - Disponibilizado canal de mensagens para o aluno tirar dúvidas e acompanhar a evolução do processo seletivo.
+- **Impactos & Observações:** Checagem TypeScript estrita concluída com 0 erros (`npx tsc --noEmit`). Atende plenamente à proposta de valor central do aplicativo PEIA.
+
+### [2026-11-11] - Efeito de Onda Expansiva de Dispersão de Cores nos Componentes da Tela
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** A transição de cores dos componentes ao alternar o tema ocorria de forma instantânea ("crua"). Foi implementado um efeito de onda expansiva de dispersão (Circular Wave Reveal) originada no botão flutuante que varre a tela e transita as cores dos componentes suavemente, somada a transições graduais de CSS no ecossistema Web.
+- **Arquivos Alterados / Criados:**
+  - `src/components/ui/theme-toggle.tsx` (Modificado - adicionada a grande onda de dispersão `screenWaveAnim` com escala de 0.1x a 52x cobrindo todo o viewport com a cor do tema de destino e borda iluminada antes de dissolver)
+  - `src/global.css` (Modificado - adicionadas regras de transição suave de 400ms para propriedades de cor, background e borda na camada base)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - Ao alternar o tema, uma onda circular irradia do botão flutuante cobrindo toda a tela de ponta a ponta com a cor do próximo tema (`#03031b` para escuro e `#f8fafc` para claro).
+  - A troca de tema ocorre com timing orquestrado (180ms), fazendo com que todos os componentes pareçam ser "tingidos" gradualmente pela onda expansiva.
+  - No ambiente Web, todos os cards, textos e bordas realizam transição cúbica de 400ms em perfeita harmonia.
+- **Impactos & Observações:** Validação de tipos aprovada com 0 erros (`npx tsc --noEmit`). 100% acelerado por hardware com `useNativeDriver: true`.
+
+### [2026-11-11] - Animação Fluida de Dispersão no Alternador de Tema (ThemeToggle)
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** O botão flutuante de alternância entre tema claro e escuro trocava o estado instantaneamente sem suavização visual. Foi implementada uma animação de dispersão em ondas de choque concêntricas combinada com rotação elástica e escala do ícone.
+- **Arquivos Alterados / Criados:**
+  - `src/components/ui/theme-toggle.tsx` (Refatorado - adicionadas ondas de choque com halos concêntricos que irradiam do centro e se dissipam com opacidade/escala, além de rotação de 360° e bounce no ícone do Sol/Lua)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - Criação de três camadas concêntricas de dispersão (`wave1`, `wave2`, `wave3`) com interpolação de escala (de 0.7x até 3.8x) e esmaecimento progressivo de opacidade, adaptando as cores para o novo tema selecionado (dourado/âmbar para o tema escuro/sol e anil/índigo para o tema claro/lua).
+  - Animação do ícone com escala elástica (spring) e rotação de 360 graus sincronizada a 60fps usando o driver nativo (`useNativeDriver: true`).
+- **Impactos & Observações:** Checagem TypeScript estrita concluída com 0 erros (`npx tsc --noEmit`). Compatível com ambientes nativos e web.
+
+### [2026-11-11] - Adição de Estado de Transição com Loading Entre Autenticação e Home
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Criação de um estado de loading/transição visual pós-autenticação para simular a inicialização e sincronização das informações do perfil, vagas e currículo no SQLite antes de entrar na tela Home.
+- **Arquivos Alterados / Criados:**
+  - `src/components/auth/auth-loading-transition.tsx` (Criado - componente de transição com modal suave, branding PEIA, ambient glow, spinner Indigo, etapas de sincronização e barra de progresso)
+  - `src/hooks/use-auth-form.ts` (Modificado - adicionados os estados `transitioning` e `transitionRole`, com delay simulado de carregamento antes de navegar via `router.replace`)
+  - `src/components/auth/auth-form.tsx` (Modificado - integrado o `AuthLoadingTransition` exibido ao confirmar login/cadastro)
+  - `docs/ARCHITECTURE.md` (Modificado)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - Ao validar o login ou concluir o cadastro, o app ativa a tela de transição com mensagens sequenciais ("Autenticando como [Persona]...", "Sincronizando currículo e oportunidades no SQLite...", "Carregando seu ambiente...") antes de renderizar a Home ou a rota de destino da persona.
+- **Impactos & Observações:** Checagem TypeScript estrita concluída com 0 erros (`npx tsc --noEmit`). Proporciona experiência fluida e polida ao usuário.
+
+### [2026-11-11] - Refatoração Completa das Subrotas de Home com Hooks e Componentes
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Extensão da arquitetura de separação de responsabilidades para todas as subrotas de `/home` (`index.tsx`, `companies.tsx` e `scan.tsx`), extraindo lógica e estado para custom hooks e dividindo as interfaces em componentes reutilizáveis, modulares e declarativos.
+- **Arquivos Alterados / Criados:**
+  - `src/hooks/use-vagas-feed.ts` (Criado - gerencia busca textual, filtros de modalidade, áreas e arquivadas via memoização)
+  - `src/hooks/use-companies-management.ts` (Criado - gerencia formulário de empresas parceiras, validação, persistência e estados de loading/sucesso)
+  - `src/hooks/use-curriculo-scanner.ts` (Criado - orquestra permissões e captura de câmera, escolha de imagens/PDFs, extração via OCR e importação ao currículo)
+  - `src/components/home/filter-chip.tsx` (Criado - chip de filtro reutilizável com estilos ativo/inativo)
+  - `src/components/home/vagas-feed-header.tsx` (Criado - cabeçalho com input de busca e pills de filtros de modalidade e área)
+  - `src/components/home/vaga-card.tsx` (Criado - card individual de vaga com badges de área, bolsa e navegação)
+  - `src/components/home/vagas-empty.tsx` (Criado - estado vazio para quando a busca ou filtros não retornarem resultados)
+  - `src/components/companies/companies-header.tsx` (Criado - cabeçalho da aba de empresas com atalho para gestão)
+  - `src/components/companies/company-form.tsx` (Criado - formulário de cadastro de empresas com validação e loading)
+  - `src/components/companies/company-card.tsx` (Criado - card de empresa conveniada)
+  - `src/components/companies/companies-list.tsx` (Criado - listagem de empresas com contador e estado vazio)
+  - `src/components/companies/companies-restricted-view.tsx` (Criado - aviso amigável para perfis sem permissão de cadastro)
+  - `src/components/scan/scan-header.tsx` (Criado - cabeçalho com orientações sobre a leitura de currículos)
+  - `src/components/scan/scan-camera-card.tsx` (Criado - visor de câmera com permissões, captura e visualização prévia)
+  - `src/components/scan/scan-file-card.tsx` (Criado - seletor de arquivos de imagem e PDF)
+  - `src/components/scan/scan-preview-card.tsx` (Criado - textarea de revisão do texto extraído pelo OCR e ação de importação)
+  - `src/app/home/index.tsx` (Refatorado - de 130 linhas para ~48 linhas, 100% declarativo)
+  - `src/app/home/companies.tsx` (Refatorado - de 101 linhas para ~47 linhas, 100% declarativo)
+  - `src/app/home/scan.tsx` (Refatorado - de 210 linhas para ~82 linhas, 100% declarativo)
+  - `docs/ARCHITECTURE.md` (Modificado)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - Padronização arquitetural absoluta: todos os arquivos dentro de `src/app/home/` atuam apenas como orquestradores de layout, delegando estados para hooks e renderização para componentes autocontidos.
+  - Eliminação de duplicações e lógica de persistência ou OCR acopladas diretamente na camada de view.
+- **Impactos & Observações:** Checagem estrita de TypeScript aprovada com 0 erros (`npx tsc --noEmit`). Todo o módulo Home agora segue o mais alto padrão de manutenibilidade e clean code.
+
+### [2026-11-11] - Modularização por Componentes e Hook Customizado no Perfil
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Refatoração da tela de perfil (`src/app/home/profile.tsx`) para desacoplar lógica de estado, validação e manipulação de conta em um custom hook (`useProfileForm`) e quebrar os elementos visuais em componentes reutilizáveis e autocontidos (`src/components/profile/`).
+- **Arquivos Alterados / Criados:**
+  - `src/hooks/use-profile-form.ts` (Criado - hook customizado que isola o estado do formulário, validações de campos de contato, sincronização com o perfil ativo e fluxo seguro de exclusão de conta)
+  - `src/components/profile/profile-header.tsx` (Criado - cabeçalho com identificação da persona, badge de cargo e subtítulo adaptativo)
+  - `src/components/profile/profile-admin-card.tsx` (Criado - banner de atalho para o painel de gestão de usuários restrito a Admin/Super Admin)
+  - `src/components/profile/profile-personal-data-form.tsx` (Criado - formulário de contato com validação e feedback de salvamento)
+  - `src/components/profile/profile-inscricoes-list.tsx` (Criado - listagem visual das vagas inscritas com navegação para detalhes)
+  - `src/components/profile/profile-danger-zone.tsx` (Criado - botão de exclusão de perfil em zona de risco)
+  - `src/app/home/profile.tsx` (Refatorado - redução para ~48 linhas, declarativo e modular)
+  - `docs/ARCHITECTURE.md` (Modificado - adicionados o novo hook e pasta de componentes)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - Eliminação de estados manuais e lógicas redundantes no arquivo de rota `profile.tsx`.
+  - Separação clara de responsabilidades: rota apenas compõe componentes; o hook gerencia o ciclo de vida do formulário e validações.
+  - Eliminação de resquícios de chave legada do currículo direto no perfil, centralizando o currículo no `CurriculoGeralEditor`.
+- **Impactos & Observações:** Checagem TypeScript estrita concluída com 0 erros (`npx tsc --noEmit`). Layout limpo e manutenível.
+
+### [2026-11-11] - Interface de Currículo Geral no Perfil e Visualização/Envio Direcionado na Vaga
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Construção das interfaces de usuário para gerenciamento completo do Currículo Geral no Perfil do Estudante e fluxo inteligente de candidatura direcionada e inspeção do currículo enviado na tela de Detalhes da Vaga.
+- **Arquivos Alterados / Criados:**
+  - `src/components/curriculo/curriculo-geral-editor.tsx` (Criado - componente modular no perfil com abas para Resumo, Formações, Experiências, Habilidades com chips e Idiomas/Projetos, além de formulários modais de cadastro e remoção atômica)
+  - `src/components/curriculo/modal-candidatura-vaga.tsx` (Criado - modal de candidatura onde o aluno adapta seu resumo/pitch e seleciona quais habilidades e experiências do seu currículo mestre deseja direcionar para a vaga)
+  - `src/components/curriculo/modal-visualizar-curriculo-vaga.tsx` (Criado - modal de inspeção do snapshot do currículo exato que foi submetido, com data de envio, pitch e qualificações enviadas, além de opção de cancelamento de candidatura)
+  - `src/app/home/profile.tsx` (Refatorado - integrado ao `CurriculoGeralEditor`, substituindo inputs de texto simples pela gestão estruturada)
+  - `src/app/vaga/[id].tsx` (Refatorado - adicionado card de candidatura enviada com botão "Visualizar currículo enviado", além de acionamento do fluxo direcionado antes da inscrição)
+  - `docs/ARCHITECTURE.md` (Modificado - adicionada pasta `src/components/curriculo/` na árvore arquitetural)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - Substituição da interface legada de currículo de texto plano no Perfil por um editor modular rico, com suporte a inclusão, visualização e exclusão de itens de formação acadêmica, histórico profissional, chips de habilidades e idiomas.
+  - Na tela de Detalhes da Vaga, se o aluno ainda não se candidatou, o botão "Candidatar-se com currículo direcionado" abre o modal permitindo personalizar o pitch e selecionar os itens chave.
+  - Se o aluno já se candidatou, exibe status de candidatura enviada e permite abrir o modal para inspecionar exatamente o que foi enviado para a empresa, além de permitir o cancelamento.
+- **Impactos & Observações:** Checagem de tipos estrita aprovada com 0 erros (`npx tsc --noEmit`). Funcionalidade 100% alinhada aos requisitos e à arquitetura do PEIA.
+
+### [2026-11-11] - Implementação do Service e Hook Reativo de Currículos (Geral e Vagas)
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Construção da camada de persistência resiliente em SQLite e hook reativo para gerenciar o ciclo de vida do Currículo Geral (Master) e dos Currículos Direcionados para Vagas, sem uso de Redux ou Zustand.
+- **Arquivos Alterados / Criados:**
+  - `src/services/curriculo-service.ts` (Criado - persistência em SQLite em tabelas `curriculos_gerais` e `curriculos_vagas`, com fallback em AsyncStorage, bootstrap do mock e migração transparente do formato legado)
+  - `src/hooks/use-curriculo.ts` (Criado - hooks `useCurriculoGeral`, `useCurriculosVagas`, `useCurriculoVaga` via `useSyncExternalStore` e objeto de ações `curriculoActions`)
+  - `docs/ARCHITECTURE.md` (Modificado - adicionados o novo service e hook à documentação)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - `curriculoService`: implementadas operações atômicas de leitura e gravação no SQLite nativo com fallback transparente para o AsyncStorage; migração automática a partir do armazenamento legado `peia:resume` ou seed com o perfil pré-cadastrado do estudante.
+  - `useCurriculoGeral`: hook reativo que expõe o currículo mestre completo para componentes da aplicação.
+  - `useCurriculosVagas` e `useCurriculoVaga(vagaId)`: hooks reativos para inspecionar os currículos direcionados e snapshots enviados para vagas específicas.
+  - `curriculoActions`: métodos completos para manipulação granular: contato, bio/resumo, formação acadêmica, experiências profissionais, habilidades, idiomas, projetos e certificações, além de `candidatarComCurriculoVaga` e `cancelarCandidaturaVaga`.
+- **Impactos & Observações:** Validação de tipos aprovada (`npx tsc --noEmit` sem erros). O ecossistema está preparado para a criação da interface de usuário modular no perfil e no fluxo de candidatura.
+
+### [2026-11-11] - Estruturação de Dados para Currículo Geral e Currículo Direcionado para Vaga
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Criação da estrutura de dados para o módulo de currículos do estudante, distinguindo o Currículo Geral (Master Resume com histórico e competências completas) do Currículo Direcionado (Targeted Resume com recorte e foco customizados para envio às vagas).
+- **Arquivos Alterados / Criados:**
+  - `src/data/curriculo.ts` (Criado - interfaces tipadas, modelos granulares de formação, experiência, habilidades, projetos, certificações e idiomas, além de métodos utilitários de conversão e factory)
+  - `docs/ARCHITECTURE.md` (Modificado - adicionado `src/data/curriculo.ts` na árvore de arquitetura)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - Criada a interface `CurriculoGeral` para consolidar todos os dados cadastrados pelo aluno: dados de contato, bio/resumo geral, formações acadêmicas (`FormacaoAcademica`), experiências profissionais (`ExperienciaProfissional`), habilidades técnicas e comportamentais (`Habilidade`), projetos pessoais/acadêmicos (`ProjetoAcademicoOuPessoal`), certificações (`CertificacaoOuCurso`) e idiomas (`Idioma`).
+  - Criada a interface `CurriculoVaga` para representar o snapshot/versão direcionada de candidatura: vinculada a um `vagaId`, permitindo resumo customizado (pitch), carta de apresentação, subconjunto selecionado de experiências/habilidades/projetos e indicador opcional de compatibilidade (`compatibilidadeEstimada`).
+  - Implementadas funções utilitárias: `criarCurriculoGeralVazio`, `gerarCurriculoVaga` (filtragem e montagem a partir do currículo mestre), `converterLegadoParaCurriculoGeral` e `converterCurriculoGeralParaLegado` (garantindo compatibilidade com os campos legados de texto e OCR).
+  - Incluído mock completo (`MOCK_CURRICULO_GERAL`) para testes de tipagem e prototipação rápida.
+- **Impactos & Observações:** Sem breaking changes. O projeto mantém 100% de integridade de tipos com `npx tsc --noEmit`. Base pronta para a construção dos hooks, serviços de persistência e telas de visualização/edição granular.
+
 ### [2026-11-11] - Refatoração Arquitetural e Desacoplamento de Estados Paralelos
 - **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
 - **Motivação / Contexto:** Adequação estrita do código aos padrões de arquitetura do PEIA, corrigindo desvios introduzidos anteriormente como duplicação de papéis/armazenamento, quebra da camada de serviços, bloqueios arbitrários em vagas e uso de strings de rotas hardcoded.

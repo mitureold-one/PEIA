@@ -33,6 +33,8 @@ export function useAuthForm(isSignUp: boolean) {
   const auth = useAuth();
 
   const [loading, setLoading] = useState(false);
+  const [transitioning, setTransitioning] = useState(false);
+  const [transitionRole, setTransitionRole] = useState<'estudante' | 'empresa' | 'coordenacao'>('estudante');
   const [showPassword, setShowPassword] = useState(false);
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
@@ -199,8 +201,12 @@ export function useAuthForm(isSignUp: boolean) {
           'success',
           'Conta criada!',
           `Bem-vindo(a) ao PEIA, ${savedUser.name}! Seu cadastro foi salvo no banco local.`,
-          () => {
-            router.replace(ROUTES.HOME);
+          async () => {
+            const targetRole = role === 'aluno' ? 'estudante' : role === 'empresa' ? 'empresa' : 'coordenacao';
+            setTransitionRole(targetRole);
+            setTransitioning(true);
+            await new Promise((resolve) => setTimeout(resolve, 1100));
+            router.replace(targetRole === 'coordenacao' ? ROUTES.COMPANIES : ROUTES.HOME);
           }
         );
       } catch (err: any) {
@@ -224,6 +230,13 @@ export function useAuthForm(isSignUp: boolean) {
             ? 'empresa'
             : 'coordenacao';
         userRoleActions.definir(targetRole);
+
+        // Ativa estado visual de transição simulando carregamento e sincronização com SQLite
+        setTransitionRole(targetRole);
+        setTransitioning(true);
+
+        await new Promise((resolve) => setTimeout(resolve, 1200));
+
         if (targetRole === 'coordenacao') {
           router.replace(ROUTES.COMPANIES);
         } else {
@@ -240,6 +253,8 @@ export function useAuthForm(isSignUp: boolean) {
 
   return {
     loading: loading || auth.loading,
+    transitioning,
+    transitionRole,
     showPassword,
     showRegisterPassword,
     toggleShowPassword,

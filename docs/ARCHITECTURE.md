@@ -42,6 +42,7 @@ PEIA/
 │   │   │   ├── _layout.tsx    # Configuração das Tabs com exibição dinâmica por persona
 │   │   │   ├── index.tsx      # Feed principal com busca e filtros de vagas
 │   │   │   ├── scan.tsx       # Leitura e extração de currículos (Câmera, Imagem ou PDF)
+│   │   │   ├── conversas.tsx  # Central de feedback de candidaturas, diagnóstico IA e chat
 │   │   │   ├── companies.tsx  # Cadastro local de empresas parceiras (Coordenação/Admin)
 │   │   │   ├── profile.tsx    # Perfil do usuário, currículo, inscrições e atalho admin
 │   │   │   └── logout.tsx     # Handler de encerramento de sessão
@@ -50,26 +51,41 @@ PEIA/
 │   │       ├── [id].tsx       # Detalhes da vaga, candidatura do aluno e restrições
 │   │       └── form.tsx       # Anúncio de novas vagas (exclusivo para perfil Empresa)
 │   ├── components/            # Componentes visuais modulares e reutilizáveis
-│   │   ├── auth/              # Formulários, atalhos rápidos e cabeçalhos de autenticação
-│   │   ├── home/              # Header e elementos visuais da Home
+│   │   ├── auth/              # Formulários, atalhos rápidos, transição de loading e cabeçalhos de autenticação
+│   │   ├── companies/         # Componentes modulares da tela de empresas (Form, List, Card, Header)
+│   │   ├── conversas/         # Cards de feedback, diagnóstico de currículo e chat de candidaturas
+│   │   ├── curriculo/         # Gestão de currículo geral e modais de candidatura direcionada
+│   │   ├── home/              # Header, filtros, cards e empty state do feed de vagas
+│   │   ├── profile/           # Componentes modulares da tela de perfil (Header, Dados, Inscrições, Admin)
+│   │   ├── scan/              # Componentes de leitura de currículo (Câmera, Arquivo, Preview)
 │   │   └── ui/                # Primitivos de UI acessíveis (Button, Input, AlertModal, ThemeToggle)
 │   ├── constants/             # Constantes globais
 │   │   ├── routes.ts          # Nomes e caminhos tipados de rotas (`ROUTES`)
 │   │   └── theme.ts           # Definições de cores e tokens de tema
 │   ├── data/                  # Entidades de domínio, schemas e mocks
+│   │   ├── curriculo.ts       # Modelagem de Currículo Geral (Master) e Currículo Direcionado para Vaga
+│   │   ├── feedback.ts        # Modelagem de Diagnóstico IA, Match Score e Mensagens de Candidatura
 │   │   ├── user.ts            # Entidade de domínio User e personas (Aluno, Empresa, Admin, Super Admin)
 │   │   └── vagas.ts           # Interface Vaga, constantes de áreas, modalidades e mocks
 │   ├── hooks/                 # Custom hooks e stores de estado reativos
 │   │   ├── use-auth.ts        # Caso de uso de autenticação e orquestração de usuário
 │   │   ├── use-auth-form.ts   # Lógica e validação da interface de autenticação
+│   │   ├── use-conversas.ts   # Store reativo de conversas e diagnósticos de candidatura
+│   │   ├── use-profile-form.ts# Orquestração de estado e validação do formulário de perfil
+│   │   ├── use-vagas-feed.ts  # Orquestração de busca e filtros do feed de vagas
+│   │   ├── use-companies-management.ts # Lógica e formulário de empresas conveniadas
+│   │   ├── use-curriculo-scanner.ts    # Orquestração de câmera, arquivo e OCR
 │   │   ├── use-user-role.ts   # Papel ativo no protótipo (estudante, empresa, coordenacao)
 │   │   ├── use-vagas.ts       # Store global reativo de vagas integrado ao vagasService
+│   │   ├── use-curriculo.ts   # Store global reativo do currículo geral e currículos direcionados de vagas
 │   │   ├── use-perfil.ts      # Store global reativo do perfil da sessão ativa
 │   │   ├── use-empresas.ts    # Store de empresas parceiras cadastradas
 │   │   ├── use-inscricoes.ts  # Store de candidaturas dos estudantes nas vagas
 │   │   ├── use-theme.ts       # Acesso e controle do tema claro/escuro
 │   │   └── use-color-scheme.ts# Wrapper para detecção de tema do sistema
 │   ├── services/              # Camada de serviços e persistência
+│   │   ├── curriculo-service.ts # Persistência de currículos no SQLite com fallback transparente
+│   │   ├── feedback-service.ts  # Persistência de conversas e feedbacks de candidatura no SQLite
 │   │   ├── user-service.ts    # Persistência de usuários (SQLite com fallback transparente)
 │   │   └── vagas-service.ts   # Persistência de vagas (SQLite com fallback transparente)
 │   ├── utils/                 # Funções auxiliares puras e OCR agnóstico de plataforma

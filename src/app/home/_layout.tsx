@@ -46,6 +46,7 @@ export default function HomeLayout() {
     >
       <Tabs.Screen name="index" options={{ title: role === 'estudante' ? 'Estágios' : 'Vagas', tabBarIcon: icon('home') }} />
       <Tabs.Screen name="scan" options={{ title: 'Escanear', tabBarIcon: icon('scan'), href: role === 'estudante' ? undefined : null }} />
+      <Tabs.Screen name="conversas" options={{ title: 'Conversas', tabBarIcon: icon('chatbubbles'), href: role === 'estudante' ? undefined : null }} />
       <Tabs.Screen name="companies" options={{ title: 'Empresas', tabBarIcon: icon('business'), href: role === 'coordenacao' ? undefined : null }} />
       <Tabs.Screen name="profile" options={{ title: role === 'estudante' ? 'Perfil' : 'Conta', tabBarIcon: icon('person') }} />
       <Tabs.Screen

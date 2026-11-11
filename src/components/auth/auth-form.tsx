@@ -1,6 +1,7 @@
 import { AlertModal } from '@/components/ui/alert-modal';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { AuthLoadingTransition } from '@/components/auth/auth-loading-transition';
 import { useAuthForm } from '@/hooks/use-auth-form';
 import { Ionicons } from '@expo/vector-icons';
 import { useColorScheme } from 'nativewind';
@@ -16,6 +17,8 @@ export function AuthForm({ isSignUp }: AuthFormProps) {
 
   const {
     loading,
+    transitioning,
+    transitionRole,
     showPassword,
     showRegisterPassword,
     toggleShowPassword,
@@ -220,7 +223,6 @@ export function AuthForm({ isSignUp }: AuthFormProps) {
                 }}
                 className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex-row items-center gap-1.5 active:opacity-70"
               >
-                <Text className="text-xs">🎓</Text>
                 <Text className="text-xs font-semibold text-slate-700 dark:text-slate-200">Aluno</Text>
               </TouchableOpacity>
 
@@ -232,7 +234,6 @@ export function AuthForm({ isSignUp }: AuthFormProps) {
                 }}
                 className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex-row items-center gap-1.5 active:opacity-70"
               >
-                <Text className="text-xs">🏢</Text>
                 <Text className="text-xs font-semibold text-slate-700 dark:text-slate-200">Empresa</Text>
               </TouchableOpacity>
 
@@ -244,7 +245,6 @@ export function AuthForm({ isSignUp }: AuthFormProps) {
                 }}
                 className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex-row items-center gap-1.5 active:opacity-70"
               >
-                <Text className="text-xs">🛡️</Text>
                 <Text className="text-xs font-semibold text-slate-700 dark:text-slate-200">Admin</Text>
               </TouchableOpacity>
 
@@ -256,7 +256,6 @@ export function AuthForm({ isSignUp }: AuthFormProps) {
                 }}
                 className="px-3 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex-row items-center gap-1.5 active:opacity-70"
               >
-                <Text className="text-xs">👑</Text>
                 <Text className="text-xs font-semibold text-slate-700 dark:text-slate-200">Super Admin</Text>
               </TouchableOpacity>
             </View>
@@ -265,6 +264,7 @@ export function AuthForm({ isSignUp }: AuthFormProps) {
       )}
 
       <AlertModal {...alert} onClose={closeAlert} />
+      <AuthLoadingTransition visible={transitioning} role={transitionRole} />
     </View>
   );
 }
