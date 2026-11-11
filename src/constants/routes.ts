@@ -23,6 +23,9 @@ export const ROUTES = {
   // Aba de Perfil do Usuário (src/app/home/profile.tsx)
   PROFILE: '/home/profile',
 
+  // Configurações da Plataforma e CRUD da Conta User (src/app/configuracoes.tsx)
+  CONFIGURACOES: '/configuracoes',
+
   // Formulário de Criação/Edição de Vaga (src/app/vaga/form.tsx)
   VAGA_FORM: '/vaga/form',
 

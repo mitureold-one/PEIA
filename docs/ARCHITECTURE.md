@@ -116,6 +116,7 @@ PEIA/
     - **Empresa:** Vê "Vagas", "Conta" e "Sair" (aba de escanear currículo é oculta).
     - **Coordenação:** Vê "Oportunidades", "Empresas", "Conta" e "Sair" (abre inicialmente na aba de empresas).
 - **Rotas Administrativas:** `/admin/usuarios` (Protegida por checagem de perfil: apenas `admin` e `superadmin`).
+- **Rotas de Configuração da Conta:** `/configuracoes` (Acessível pelo Avatar do usuário no Header; gerencia o CRUD da conta `User`, foto de perfil e encerramento de sessão).
 - **Rotas de Vagas:** `/vaga/[id]` (Detalhes e inscrição) e `/vaga/form` (Criação de novas vagas).
 - **Atenção:** Consulte sempre a documentação oficial da versão `v58.0.0` do Expo: https://docs.expo.dev/versions/v58.0.0/
 

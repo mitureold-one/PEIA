@@ -28,6 +28,26 @@ Este documento é o **registro oficial e mandatório** de todas as mudanças imp
 
 ## Histórico de Mudanças
 
+### [2026-11-11] - Separação Física: Menu de Conta no Header e Subclasse Estudante no Bottom Tab
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Reestruturação arquitetural de UX solicitada pelo usuário para separar fisicamente as informações da superclasse `User` e as informações da subclasse `Estudante`:
+  - No menu superior (Header), foi adicionado no canto esquerdo um botão com o Avatar do usuário que navega para a tela dedicada de Configurações da Plataforma (`/configuracoes`), onde reside o CRUD completo da conta `User` (foto, nome, sobrenome, e-mail, telefone, preferências e encerramento de sessão).
+  - No menu inferior (Bottom Tabs), a aba agora se concentra **exclusivamente nas informações da subclasse** do Estudante (candidaturas ativas e editor de currículo master para IA), sem misturar com configurações cadastrais.
+- **Arquivos Alterados / Criados:**
+  - `src/constants/routes.ts` (Modificado - adicionada a rota `CONFIGURACOES: '/configuracoes'`)
+  - `src/app/_layout.tsx` (Modificado - registrado `<Stack.Screen name="configuracoes" />`)
+  - `src/components/home/home-header.tsx` (Refatorado - adicionado botão de perfil/avatar no canto esquerdo com badge de configurações que navega para `/configuracoes`)
+  - `src/app/configuracoes.tsx` (Criado - tela dedicada ao CRUD da conta `User`, alteração de foto de perfil com editor nativo/câmera, edição de dados cadastrais com persistência no SQLite e zona de desconexão/exclusão)
+  - `src/components/profile/profile-student-header.tsx` (Criado - card de identificação focado na subclasse do Estudante com atalho para o menu de configurações)
+  - `src/app/home/profile.tsx` (Refatorado - tela de aba focada exclusivamente na subclasse do estudante: inscrições e currículo geral)
+  - `src/app/home/_layout.tsx` (Modificado - rótulo da aba renomeado para "Currículo" para estudante com ícone temático de documento)
+  - `src/components/profile/profile-header.tsx` (Removido - substituído pela tela `/configuracoes` e `profile-student-header.tsx`)
+  - `docs/ARCHITECTURE.md` (Modificado)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - Separação clara de responsabilidades: o usuário sabe exatamente que a foto no topo esquerdo gerencia a sua conta na plataforma, e a aba inferior gerencia suas atividades acadêmicas de estágio e currículo.
+- **Impactos & Observações:** Checagem TypeScript estrita concluída com 0 erros (`npx tsc --noEmit`). Navegação limpa e intuitiva.
+
 ### [2026-11-11] - Unificação de Identidade do Usuário com Foto em Evidência e Menu Retrátil
 - **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
 - **Motivação / Contexto:** Melhoria de UX na tela de Perfil atendendo à solicitação de unir a identificação cadastral do usuário diretamente com sua foto/avatar: a foto agora permanece sempre à mostra em posição de destaque central, enquanto as informações detalhadas e formulário de edição de contato institucional (Nome, Sobrenome, E-mail, Telefone) foram recolhidas em um menu retrátil elegante integrado no mesmo bloco de cabeçalho.

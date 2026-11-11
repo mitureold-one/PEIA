@@ -38,6 +38,7 @@ export default function RootLayout() {
         <Stack.Screen name="home" options={{ headerShown: false }} />
         <Stack.Screen name="vaga" options={{ headerShown: false }} />
         <Stack.Screen name="admin" options={{ headerShown: false }} />
+        <Stack.Screen name="configuracoes" options={{ headerShown: false }} />
       </Stack>
     </View>
   );
