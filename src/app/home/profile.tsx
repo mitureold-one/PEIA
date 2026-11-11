@@ -4,7 +4,6 @@ import { useUserRole } from '@/hooks/use-user-role';
 import { useProfileForm } from '@/hooks/use-profile-form';
 import { ProfileHeader } from '@/components/profile/profile-header';
 import { ProfileAdminCard } from '@/components/profile/profile-admin-card';
-import { ProfilePersonalDataForm } from '@/components/profile/profile-personal-data-form';
 import { ProfileInscricoesList } from '@/components/profile/profile-inscricoes-list';
 import { ProfileDangerZone } from '@/components/profile/profile-danger-zone';
 import { CurriculoGeralEditor } from '@/components/curriculo/curriculo-geral-editor';
@@ -26,12 +25,17 @@ export default function Profile() {
   return (
     <SafeAreaView edges={[]} className="flex-1 bg-slate-50 dark:bg-[#03031b]">
       <ScrollView contentContainerClassName="gap-4 p-6" keyboardShouldPersistTaps="handled">
-        {/* Cabeçalho da conta e identificação do perfil */}
+        {/* Card Unificado: Foto sempre à mostra + Identificação + Menu retrátil de Informações da Conta */}
         <ProfileHeader
           perfil={perfil}
           role={role}
           onUpdateAvatar={handleAvatarChange}
           onRemoveAvatar={handleRemoveAvatar}
+          dados={dados}
+          errors={errors}
+          saved={saved}
+          onChangeField={handleChange}
+          onSave={save}
         />
 
         {/* Atalho para o painel administrativo (Admin e Super Admin) */}
@@ -44,16 +48,6 @@ export default function Profile() {
             <CurriculoGeralEditor />
           </>
         )}
-
-        {/* Informações da superclasse User (Recolhidas em Toggle expansível) */}
-        <ProfilePersonalDataForm
-          dados={dados}
-          errors={errors}
-          saved={saved}
-          onChangeField={handleChange}
-          onSave={save}
-          defaultExpanded={role !== 'estudante'}
-        />
 
         {/* Ação de encerramento/exclusão de conta */}
         <ProfileDangerZone onExcluir={confirmarExclusao} />

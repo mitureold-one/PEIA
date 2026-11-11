@@ -28,6 +28,20 @@ Este documento é o **registro oficial e mandatório** de todas as mudanças imp
 
 ## Histórico de Mudanças
 
+### [2026-11-11] - Unificação de Identidade do Usuário com Foto em Evidência e Menu Retrátil
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Melhoria de UX na tela de Perfil atendendo à solicitação de unir a identificação cadastral do usuário diretamente com sua foto/avatar: a foto agora permanece sempre à mostra em posição de destaque central, enquanto as informações detalhadas e formulário de edição de contato institucional (Nome, Sobrenome, E-mail, Telefone) foram recolhidas em um menu retrátil elegante integrado no mesmo bloco de cabeçalho.
+- **Arquivos Alterados / Criados:**
+  - `src/components/profile/profile-header.tsx` (Refatorado - unificado com avatar sempre em evidência, dados essenciais visíveis e menu retrátil "Informações da Conta" com campos de edição e persistência integrados)
+  - `src/app/home/profile.tsx` (Refatorado - repasse direto de estados ao `ProfileHeader`, eliminando blocos redundantes na tela)
+  - `src/components/profile/profile-personal-data-form.tsx` (Removido - lógica e visual incorporados ao menu retrátil do card de perfil)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - O perfil do estudante e demais personas agora apresenta um visual muito mais limpo e harmônico: a foto do perfil e o nome ficam em evidência imediata.
+  - Para visualizar ou editar os dados cadastrais (nome, sobrenome, email e telefone), o usuário acessa o menu recolhível "Informações da Conta" no próprio card.
+  - A tela do estudante foca imediatamente nas Inscrições e no Editor de Currículo Geral sem rolagem desnecessária.
+- **Impactos & Observações:** Checagem TypeScript estrita concluída com 0 erros (`npx tsc --noEmit`). Eliminação de código morto e simplificação do layout.
+
 ### [2026-11-11] - Editor Nativo de Foto no Celular e Persistência Completa no SQLite
 - **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
 - **Motivação / Contexto:** Integração com o editor e cortador de fotos nativo do sistema operacional (Android e iOS) via `expo-image-picker` com `allowsEditing: true` e proporção `aspect: [1, 1]`, adicionando suporte à câmera do aparelho, e fechamento do ciclo de persistência resiliente no SQLite (`userService.save` e `peia.db`), garantindo que o avatar e alterações cadastrais do perfil persistam entre sessões e no painel administrativo.
