@@ -56,7 +56,7 @@ PEIA/
 │   │   ├── conversas/         # Cards de feedback, diagnóstico de currículo e chat de candidaturas
 │   │   ├── curriculo/         # Gestão de currículo geral e modais de candidatura direcionada
 │   │   ├── home/              # Header, filtros, cards e empty state do feed de vagas
-│   │   ├── profile/           # Componentes modulares da tela de perfil (Header, Dados, Inscrições, Admin)
+│   │   ├── profile/           # Componentes modulares da tela de perfil (Views por persona, Header, Wall, Interests, Admin)
 │   │   ├── scan/              # Componentes de leitura de currículo (Câmera, Arquivo, Preview)
 │   │   └── ui/                # Primitivos de UI acessíveis (Button, Input, AlertModal, ThemeToggle, ProfileMetricDialogModal)
 │   ├── constants/             # Constantes globais
