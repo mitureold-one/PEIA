@@ -1,7 +1,7 @@
 import { Platform } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { requireOptionalNativeModule } from 'expo';
-import { userList, User, type UserRole } from '@/data/user';
+import { userList, User, Aluno, type UserRole } from '@/data/user';
 
 const DB_NAME = 'peia.db';
 const STORAGE_KEY = 'peia:sqlite_fallback_users';
@@ -51,6 +51,30 @@ async function ensureInitialized() {
             sqliteDb.execSync(`ALTER TABLE users ADD COLUMN avatar TEXT;`);
           } catch {
             // Coluna avatar já existe
+          }
+
+          try {
+            sqliteDb.execSync(`ALTER TABLE users ADD COLUMN cargo TEXT;`);
+          } catch {
+            // Coluna cargo já existe
+          }
+
+          try {
+            sqliteDb.execSync(`ALTER TABLE users ADD COLUMN instituicao TEXT;`);
+          } catch {
+            // Coluna instituicao já existe
+          }
+
+          try {
+            sqliteDb.execSync(`ALTER TABLE users ADD COLUMN curso TEXT;`);
+          } catch {
+            // Coluna curso já existe
+          }
+
+          try {
+            sqliteDb.execSync(`ALTER TABLE users ADD COLUMN abertoOportunidades INTEGER DEFAULT 1;`);
+          } catch {
+            // Coluna abertoOportunidades já existe
           }
 
           const result = sqliteDb.getFirstSync<{ count: number }>(
@@ -104,6 +128,19 @@ async function ensureInitialized() {
   initialized = true;
 }
 
+function mapRowToUser(row: any): User {
+  if (row.role === 'aluno') {
+    return new Aluno({
+      ...row,
+      abertoOportunidades:
+        row.abertoOportunidades === 1 ||
+        row.abertoOportunidades === true ||
+        row.abertoOportunidades === undefined,
+    });
+  }
+  return new User(row);
+}
+
 export const userService = {
   /**
    * Salva ou atualiza uma entidade User na camada de persistência.
@@ -119,11 +156,18 @@ export const userService = {
       throw new Error('Já existe um usuário cadastrado com este e-mail institucional.');
     }
 
+    const aluno = user instanceof Aluno ? user : null;
+    const cargo = aluno?.cargo ?? (user as any).cargo ?? null;
+    const instituicao = aluno?.instituicao ?? (user as any).instituicao ?? null;
+    const curso = aluno?.curso ?? (user as any).curso ?? null;
+    const abertoOportunidades =
+      aluno?.abertoOportunidades ?? (user as any).abertoOportunidades ?? true;
+
     if (isSQLiteAvailable && sqliteDb) {
       try {
         sqliteDb.runSync(
-          `INSERT OR REPLACE INTO users (id, name, surname, email, phone, password, token, role, avatar, createdAt)
-           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+          `INSERT OR REPLACE INTO users (id, name, surname, email, phone, password, token, role, avatar, cargo, instituicao, curso, abertoOportunidades, createdAt)
+           VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
           [
             user.id,
             user.name,
@@ -134,6 +178,10 @@ export const userService = {
             user.token ?? '',
             user.role ?? 'aluno',
             user.avatar ?? null,
+            cargo,
+            instituicao,
+            curso,
+            abertoOportunidades ? 1 : 0,
             user.createdAt,
           ]
         );
@@ -179,7 +227,7 @@ export const userService = {
           'SELECT * FROM users WHERE LOWER(email) = LOWER(?) LIMIT 1;',
           [normalized]
         );
-        return row ? new User(row) : null;
+        return row ? mapRowToUser(row) : null;
       } catch {
         // Fallback para AsyncStorage
       }
@@ -187,7 +235,7 @@ export const userService = {
 
     const list = await userService.listAll();
     const match = list.find((u) => u.email.toLowerCase() === normalized);
-    return match ? new User(match) : null;
+    return match ? match : null;
   },
 
   /**
@@ -203,7 +251,7 @@ export const userService = {
           'SELECT * FROM users WHERE id = ? LIMIT 1;',
           [trimmedId]
         );
-        return row ? new User(row) : null;
+        return row ? mapRowToUser(row) : null;
       } catch {
         // Fallback para AsyncStorage
       }
@@ -211,7 +259,7 @@ export const userService = {
 
     const list = await userService.listAll();
     const match = list.find((u) => u.id === trimmedId);
-    return match ? new User(match) : null;
+    return match ? match : null;
   },
 
   /**
@@ -223,7 +271,7 @@ export const userService = {
     if (isSQLiteAvailable && sqliteDb) {
       try {
         const rows = sqliteDb.getAllSync<any>('SELECT * FROM users ORDER BY createdAt DESC;');
-        return rows.map((r) => new User(r));
+        return rows.map((r) => mapRowToUser(r));
       } catch {
         // Fallback para AsyncStorage
       }
@@ -232,7 +280,7 @@ export const userService = {
     try {
       const stored = await AsyncStorage.getItem(STORAGE_KEY);
       const rawList = stored ? JSON.parse(stored) : [...userList];
-      return rawList.map((r: any) => new User(r));
+      return rawList.map((r: any) => mapRowToUser(r));
     } catch {
       return [...userList];
     }

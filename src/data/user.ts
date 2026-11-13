@@ -93,11 +93,51 @@ export class User {
   }
 }
 
+/**
+ * Propriedades específicas da subclasse Aluno (Estudante).
+ */
+export interface AlunoProps extends UserProps {
+  cargo?: string;
+  instituicao?: string;
+  curso?: string;
+  abertoOportunidades?: boolean;
+}
+
+/**
+ * Subclasse de domínio que representa especificamente o Aluno / Estudante Universitário.
+ * Encapsula regras de negócio, dados acadêmicos e status de disponibilidade profissional.
+ */
+export class Aluno extends User {
+  cargo: string;
+  instituicao: string;
+  curso: string;
+  abertoOportunidades: boolean;
+
+  constructor(props: AlunoProps) {
+    super({ ...props, role: 'aluno' });
+    this.cargo = props.cargo?.trim() || 'Estudante de Tecnologia';
+    this.instituicao = props.instituicao?.trim() || 'UNDB';
+    this.curso = props.curso?.trim() || 'Graduação';
+    this.abertoOportunidades = props.abertoOportunidades ?? true;
+  }
+
+  /**
+   * Factory method para instanciar a subclasse Aluno com defaults acadêmicos seguros.
+   */
+  static createAluno(props: AlunoProps): Aluno {
+    return new Aluno(props);
+  }
+
+  get statusOportunidadeLabel(): string {
+    return this.abertoOportunidades ? 'Aberto a Oportunidades' : 'Indisponível no Momento';
+  }
+}
+
 // Mantém compatibilidade com o tipo em minúsculo
 export type user = User;
 
 export const userList: User[] = [
-  new User({
+  new Aluno({
     id: '001',
     name: 'John',
     surname: 'Doe',
@@ -105,7 +145,11 @@ export const userList: User[] = [
     phone: '(98) 98888-0001',
     token: 'token_aluno_123',
     password: 'password123',
-    role: 'aluno',
+    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop&crop=faces',
+    cargo: 'Desenvolvedor Frontend Trainee',
+    instituicao: 'Centro Universitário UNDB',
+    curso: 'Engenharia de Software',
+    abertoOportunidades: true,
     createdAt: new Date().toISOString(),
   }),
   new User({

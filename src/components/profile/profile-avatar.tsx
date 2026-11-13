@@ -11,6 +11,7 @@ interface ProfileAvatarProps {
   avatar?: string;
   name: string;
   surname: string;
+  abertoOportunidades?: boolean;
   onUpdateAvatar: (uri: string) => void;
   onRemoveAvatar: () => void;
 }
@@ -42,6 +43,7 @@ export function ProfileAvatar({
   avatar,
   name,
   surname,
+  abertoOportunidades,
   onUpdateAvatar,
   onRemoveAvatar,
 }: ProfileAvatarProps) {
@@ -217,6 +219,25 @@ export function ProfileAvatar({
     setCropData(null);
   };
 
+  const hasStatus = abertoOportunidades !== undefined;
+  const ringBorder = hasStatus
+    ? abertoOportunidades
+      ? 'border-emerald-500 dark:border-emerald-400'
+      : 'border-slate-300 dark:border-slate-700'
+    : 'border-indigo-500/30 dark:border-indigo-400/40';
+
+  const badgeBg = hasStatus
+    ? abertoOportunidades
+      ? 'bg-emerald-600 dark:bg-emerald-500'
+      : 'bg-slate-500 dark:bg-slate-600'
+    : 'bg-indigo-600';
+
+  const fallbackBg = hasStatus
+    ? abertoOportunidades
+      ? 'bg-emerald-600'
+      : 'bg-slate-600'
+    : 'bg-indigo-600';
+
   return (
     <>
       <Pressable
@@ -225,7 +246,7 @@ export function ProfileAvatar({
         accessibilityLabel="Alterar foto de perfil"
         className="relative self-center items-center justify-center active:opacity-85"
       >
-        <View className="h-24 w-24 rounded-full border-2 border-indigo-500/30 dark:border-indigo-400/40 p-1 bg-white dark:bg-slate-900 shadow-md">
+        <View className={`h-24 w-24 rounded-full border-2 ${ringBorder} p-1 bg-white dark:bg-slate-900 shadow-md`}>
           {avatar ? (
             <Image
               source={{ uri: avatar }}
@@ -233,7 +254,7 @@ export function ProfileAvatar({
               className="h-full w-full rounded-full"
             />
           ) : (
-            <View className="h-full w-full rounded-full bg-indigo-600 items-center justify-center shadow-inner">
+            <View className={`h-full w-full rounded-full ${fallbackBg} items-center justify-center shadow-inner`}>
               <Text className="text-2xl font-black tracking-wider text-white">
                 {iniciais}
               </Text>
@@ -242,7 +263,7 @@ export function ProfileAvatar({
         </View>
 
         {/* Badge flutuante de câmera */}
-        <View className="absolute bottom-0 right-0 h-8 w-8 rounded-full bg-indigo-600 border-2 border-white dark:border-slate-900 items-center justify-center shadow-md">
+        <View className={`absolute bottom-0 right-0 h-8 w-8 rounded-full ${badgeBg} border-2 border-white dark:border-slate-900 items-center justify-center shadow-md`}>
           <Ionicons name="camera" size={15} color="#ffffff" />
         </View>
       </Pressable>

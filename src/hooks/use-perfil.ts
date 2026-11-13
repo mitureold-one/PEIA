@@ -12,11 +12,28 @@ export interface Perfil {
   phone: string;
   role?: UserRole;
   avatar?: string;
+  cargo?: string;
+  instituicao?: string;
+  curso?: string;
+  abertoOportunidades?: boolean;
   excluidoEm?: string;
 }
 
+const DEFAULT_PERFIL: Perfil = {
+  name: 'John',
+  surname: 'Doe',
+  email: 'john.doe@aluno.undb.edu.br',
+  phone: '(98) 98888-0001',
+  role: 'aluno',
+  avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop&crop=faces',
+  cargo: 'Desenvolvedor Frontend Trainee',
+  instituicao: 'Centro Universitário UNDB',
+  curso: 'Engenharia de Software',
+  abertoOportunidades: true,
+};
+
 // Mesmo padrão de use-vagas: store global mínimo persistido.
-let perfil: Perfil | null = null;
+let perfil: Perfil | null = { ...DEFAULT_PERFIL };
 const listeners = new Set<() => void>();
 
 const commit = (next: Perfil | null) => {
@@ -31,7 +48,11 @@ if (Platform.OS !== 'web' || typeof window !== 'undefined') {
     .then((v) => {
       if (v) {
         try {
-          perfil = JSON.parse(v);
+          const parsed = JSON.parse(v);
+          perfil = {
+            ...DEFAULT_PERFIL,
+            ...parsed,
+          };
           listeners.forEach((l) => l());
         } catch {
           // formato inválido ignorado

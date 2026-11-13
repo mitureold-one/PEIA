@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Pressable, ScrollView, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -72,48 +72,53 @@ export default function VagaForm() {
   };
 
   return (
-    <ScrollView
-      className="flex-1 bg-slate-50 dark:bg-[#03031b]"
-      contentContainerClassName="gap-4 p-6"
-      keyboardShouldPersistTaps="handled"
+    <KeyboardAvoidingView
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      className="flex-1"
     >
-      <Stack.Screen options={{ title: existente ? 'Editar vaga' : 'Nova vaga' }} />
+      <ScrollView
+        className="flex-1 bg-slate-50 dark:bg-[#03031b]"
+        contentContainerClassName="gap-4 p-6"
+        keyboardShouldPersistTaps="handled"
+      >
+        <Stack.Screen options={{ title: existente ? 'Editar vaga' : 'Nova vaga' }} />
 
-      {!canManageVagas ? (
-        <View className="gap-3 rounded-2xl border border-amber-300 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/30">
-          <Text className="font-semibold text-amber-800 dark:text-amber-300">
-            Acesso Restrito
-          </Text>
-          <Text className="text-sm text-amber-700 dark:text-amber-400">
-            Apenas empresas cadastradas e a coordenação/administração possuem permissão para anunciar ou editar vagas.
-          </Text>
-          <Button title="Voltar para as vagas" onPress={() => router.replace(ROUTES.HOME)} />
-        </View>
-      ) : (
-        <>
-          <Input label="Título" required value={titulo} onChangeText={setTitulo} errorMessage={obrigatorio(titulo)} />
-          <Input label="Empresa" required value={empresa} onChangeText={setEmpresa} errorMessage={obrigatorio(empresa)} />
-          <Input label="Cidade" required value={cidade} onChangeText={setCidade} errorMessage={obrigatorio(cidade)} />
-          <View className="gap-1.5">
-            <Text className="text-xs font-medium text-slate-700 dark:text-slate-300">Área</Text>
-            <Chips options={AREAS} value={area} onChange={setArea} />
+        {!canManageVagas ? (
+          <View className="gap-3 rounded-2xl border border-amber-300 bg-amber-50 p-4 dark:border-amber-900 dark:bg-amber-950/30">
+            <Text className="font-semibold text-amber-800 dark:text-amber-300">
+              Acesso Restrito
+            </Text>
+            <Text className="text-sm text-amber-700 dark:text-amber-400">
+              Apenas empresas cadastradas e a coordenação/administração possuem permissão para anunciar ou editar vagas.
+            </Text>
+            <Button title="Voltar para as vagas" onPress={() => router.replace(ROUTES.HOME)} />
           </View>
-          <View className="gap-1.5">
-            <Text className="text-xs font-medium text-slate-700 dark:text-slate-300">Modalidade</Text>
-            <Chips options={MODALIDADES} value={modalidade} onChange={setModalidade} />
-          </View>
-          <Input label="Bolsa (R$)" value={bolsa} onChangeText={setBolsa} keyboardType="numeric" />
-          <Input
-            label="Descrição"
-            value={descricao}
-            onChangeText={setDescricao}
-            multiline
-            textAlignVertical="top"
-            className="min-h-[100px]"
-          />
-          <Button title={existente ? 'Salvar alterações' : 'Anunciar vaga'} onPress={salvar} />
-        </>
-      )}
-    </ScrollView>
+        ) : (
+          <>
+            <Input label="Título" required value={titulo} onChangeText={setTitulo} errorMessage={obrigatorio(titulo)} />
+            <Input label="Empresa" required value={empresa} onChangeText={setEmpresa} errorMessage={obrigatorio(empresa)} />
+            <Input label="Cidade" required value={cidade} onChangeText={setCidade} errorMessage={obrigatorio(cidade)} />
+            <View className="gap-1.5">
+              <Text className="text-xs font-medium text-slate-700 dark:text-slate-300">Área</Text>
+              <Chips options={AREAS} value={area} onChange={setArea} />
+            </View>
+            <View className="gap-1.5">
+              <Text className="text-xs font-medium text-slate-700 dark:text-slate-300">Modalidade</Text>
+              <Chips options={MODALIDADES} value={modalidade} onChange={setModalidade} />
+            </View>
+            <Input label="Bolsa (R$)" value={bolsa} onChangeText={setBolsa} keyboardType="numeric" />
+            <Input
+              label="Descrição"
+              value={descricao}
+              onChangeText={setDescricao}
+              multiline
+              textAlignVertical="top"
+              className="min-h-[100px]"
+            />
+            <Button title={existente ? 'Salvar alterações' : 'Anunciar vaga'} onPress={salvar} />
+          </>
+        )}
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }

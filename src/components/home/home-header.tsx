@@ -9,6 +9,14 @@ export function HomeHeader() {
   const perfil = usePerfil();
 
   const iniciais = (perfil?.name ? perfil.name[0] : 'U').toUpperCase();
+  const isAluno = perfil?.role === 'aluno';
+  const abertoOportunidades = (perfil as any)?.abertoOportunidades ?? true;
+
+  const ringBorder = isAluno
+    ? abertoOportunidades
+      ? 'border-emerald-500 dark:border-emerald-400'
+      : 'border-slate-300 dark:border-slate-700'
+    : 'border-indigo-500/40 dark:border-indigo-400/50';
 
   const irParaConfiguracoes = () => {
     router.push(ROUTES.CONFIGURACOES);
@@ -17,6 +25,7 @@ export function HomeHeader() {
   return (
     <SafeAreaView
       edges={['top']}
+      style={{ zIndex: 50, elevation: 8 }}
       className="border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900"
     >
       <View className="flex-row items-center justify-between px-4 pb-3 pt-2">
@@ -27,7 +36,7 @@ export function HomeHeader() {
           accessibilityLabel="Abrir configurações da conta e da plataforma"
           className="relative items-center justify-center p-1 active:scale-95"
         >
-          <View className="h-10 w-10 rounded-full border-2 border-indigo-500/40 dark:border-indigo-400/50 p-0.5 bg-slate-50 dark:bg-slate-800 shadow-sm items-center justify-center">
+          <View className={`h-10 w-10 rounded-full border-2 ${ringBorder} p-0.5 bg-slate-50 dark:bg-slate-800 shadow-sm items-center justify-center`}>
             {perfil?.avatar ? (
               <Image
                 source={{ uri: perfil.avatar }}
@@ -35,13 +44,30 @@ export function HomeHeader() {
                 className="h-full w-full rounded-full"
               />
             ) : (
-              <View className="h-full w-full rounded-full bg-indigo-600 items-center justify-center">
+              <View
+                className={`h-full w-full rounded-full ${
+                  isAluno && abertoOportunidades
+                    ? 'bg-emerald-600'
+                    : isAluno && !abertoOportunidades
+                    ? 'bg-slate-600'
+                    : 'bg-indigo-600'
+                } items-center justify-center`}
+              >
                 <Text className="text-sm font-black text-white">
                   {iniciais}
                 </Text>
               </View>
             )}
           </View>
+
+          {/* Micro-badge de Status de Disponibilidade para Estudante */}
+          {isAluno && (
+            <View
+              className={`absolute bottom-0.5 right-0.5 h-3 w-3 rounded-full border border-white dark:border-slate-900 ${
+                abertoOportunidades ? 'bg-emerald-500' : 'bg-slate-400'
+              }`}
+            />
+          )}
         </Pressable>
 
         {/* Centro: Logotipo Institucional */}

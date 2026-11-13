@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Modal, Pressable, Text, TextInput, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, Text, TextInput, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { type TipoAvaliador } from '@/data/avaliacoes';
 import { avaliacoesActions, useAvaliacoes } from '@/hooks/use-avaliacoes';
@@ -223,11 +223,15 @@ export function ProfileStudentWall() {
         animationType="fade"
         onRequestClose={() => setModalVisible(false)}
       >
-        <Pressable
-          onPress={() => setModalVisible(false)}
-          className="flex-1 bg-black/60 items-center justify-center p-6"
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          className="flex-1"
         >
-          <Pressable className="w-full max-w-sm rounded-3xl bg-white dark:bg-slate-900 p-6 border border-slate-200 dark:border-slate-800 gap-3.5">
+          <Pressable
+            onPress={() => setModalVisible(false)}
+            className="flex-1 bg-black/60 items-center justify-center p-6"
+          >
+            <Pressable className="w-full max-w-sm rounded-3xl bg-white dark:bg-slate-900 p-6 border border-slate-200 dark:border-slate-800 gap-3.5">
             <View className="flex-row items-center justify-between pb-2 border-b border-slate-100 dark:border-slate-800">
               <Text className="text-base font-bold text-slate-900 dark:text-white">
                 Nova Recomendação
@@ -360,7 +364,8 @@ export function ProfileStudentWall() {
             </View>
           </Pressable>
         </Pressable>
-      </Modal>
+      </KeyboardAvoidingView>
+    </Modal>
     </View>
   );
 }

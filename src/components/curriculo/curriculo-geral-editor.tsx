@@ -9,7 +9,7 @@ import {
 import { curriculoActions, useCurriculoGeral } from '@/hooks/use-curriculo';
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from 'react';
-import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 
 export function CurriculoGeralEditor() {
   const curriculo = useCurriculoGeral();
@@ -428,54 +428,64 @@ export function CurriculoGeralEditor() {
       {/* MODAL: ADICIONAR FORMAÇÃO */}
       {/* ---------------------------------------------------------------------- */}
       <Modal visible={modalFormacao} transparent animationType="slide" onRequestClose={() => setModalFormacao(false)}>
-        <Pressable
-          onPress={() => setModalFormacao(false)}
-          className="flex-1 bg-black/60 justify-end"
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          className="flex-1"
         >
-          <Pressable className="bg-white dark:bg-slate-900 p-6 rounded-t-3xl border-t border-slate-200 dark:border-slate-800 gap-3">
-            <View className="flex-row justify-between items-center mb-1">
-              <Text className="text-lg font-bold text-slate-900 dark:text-white">Nova Formação</Text>
-              <Pressable onPress={() => setModalFormacao(false)}>
-                <Ionicons name="close" size={24} color="#94a3b8" />
-              </Pressable>
-            </View>
-            <Input label="Instituição" placeholder="Ex: UNDB" value={novaInstituicao} onChangeText={setNovaInstituicao} />
-            <Input label="Curso" placeholder="Ex: Engenharia de Software" value={novoCurso} onChangeText={setNovoCurso} />
-            <Input label="Período de Início" placeholder="Ex: 02/2023" value={novaDataInicio} onChangeText={setNovaDataInicio} />
-            <Input label="Previsão de Término / Conclusão" placeholder="Ex: 12/2026" value={novaDataFim} onChangeText={setNovaDataFim} />
-            <View className="flex-row gap-2 mt-2">
-              <Button title="Cancelar" variant="secondary" className="flex-1" onPress={() => setModalFormacao(false)} />
-              <Button title="Salvar Formação" className="flex-1" onPress={salvarNovaFormacao} />
-            </View>
+          <Pressable
+            onPress={() => setModalFormacao(false)}
+            className="flex-1 bg-black/60 justify-end"
+          >
+            <Pressable className="bg-white dark:bg-slate-900 p-6 rounded-t-3xl border-t border-slate-200 dark:border-slate-800 gap-3">
+              <View className="flex-row justify-between items-center mb-1">
+                <Text className="text-lg font-bold text-slate-900 dark:text-white">Nova Formação</Text>
+                <Pressable onPress={() => setModalFormacao(false)}>
+                  <Ionicons name="close" size={24} color="#94a3b8" />
+                </Pressable>
+              </View>
+              <Input label="Instituição" placeholder="Ex: UNDB" value={novaInstituicao} onChangeText={setNovaInstituicao} />
+              <Input label="Curso" placeholder="Ex: Engenharia de Software" value={novoCurso} onChangeText={setNovoCurso} />
+              <Input label="Período de Início" placeholder="Ex: 02/2023" value={novaDataInicio} onChangeText={setNovaDataInicio} />
+              <Input label="Previsão de Término / Conclusão" placeholder="Ex: 12/2026" value={novaDataFim} onChangeText={setNovaDataFim} />
+              <View className="flex-row gap-2 mt-2">
+                <Button title="Cancelar" variant="secondary" className="flex-1" onPress={() => setModalFormacao(false)} />
+                <Button title="Salvar Formação" className="flex-1" onPress={salvarNovaFormacao} />
+              </View>
+            </Pressable>
           </Pressable>
-        </Pressable>
+        </KeyboardAvoidingView>
       </Modal>
 
       {/* ---------------------------------------------------------------------- */}
       {/* MODAL: ADICIONAR EXPERIÊNCIA */}
       {/* ---------------------------------------------------------------------- */}
       <Modal visible={modalExp} transparent animationType="slide" onRequestClose={() => setModalExp(false)}>
-        <Pressable
-          onPress={() => setModalExp(false)}
-          className="flex-1 bg-black/60 justify-end"
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+          className="flex-1"
         >
-          <Pressable className="bg-white dark:bg-slate-900 p-6 rounded-t-3xl border-t border-slate-200 dark:border-slate-800 gap-3">
-            <View className="flex-row justify-between items-center mb-1">
-              <Text className="text-lg font-bold text-slate-900 dark:text-white">Nova Experiência</Text>
-              <Pressable onPress={() => setModalExp(false)}>
-                <Ionicons name="close" size={24} color="#94a3b8" />
-              </Pressable>
-            </View>
-            <Input label="Cargo" placeholder="Ex: Estagiário de Desenvolvimento" value={novoCargo} onChangeText={setNovoCargo} />
-            <Input label="Empresa" placeholder="Ex: Tech Solutions" value={novaEmpresa} onChangeText={setNovaEmpresa} />
-            <Input label="Período de Início" placeholder="Ex: 03/2024" value={novaDataInicioExp} onChangeText={setNovaDataInicioExp} />
-            <Input label="Descrição das Atividades" placeholder="Descreva suas tarefas e ferramentas..." value={novaDescricaoExp} onChangeText={setNovaDescricaoExp} multiline />
-            <View className="flex-row gap-2 mt-2">
-              <Button title="Cancelar" variant="secondary" className="flex-1" onPress={() => setModalExp(false)} />
-              <Button title="Salvar Experiência" className="flex-1" onPress={salvarNovaExp} />
-            </View>
+          <Pressable
+            onPress={() => setModalExp(false)}
+            className="flex-1 bg-black/60 justify-end"
+          >
+            <Pressable className="bg-white dark:bg-slate-900 p-6 rounded-t-3xl border-t border-slate-200 dark:border-slate-800 gap-3">
+              <View className="flex-row justify-between items-center mb-1">
+                <Text className="text-lg font-bold text-slate-900 dark:text-white">Nova Experiência</Text>
+                <Pressable onPress={() => setModalExp(false)}>
+                  <Ionicons name="close" size={24} color="#94a3b8" />
+                </Pressable>
+              </View>
+              <Input label="Cargo" placeholder="Ex: Estagiário de Desenvolvimento" value={novoCargo} onChangeText={setNovoCargo} />
+              <Input label="Empresa" placeholder="Ex: Tech Solutions" value={novaEmpresa} onChangeText={setNovaEmpresa} />
+              <Input label="Período de Início" placeholder="Ex: 03/2024" value={novaDataInicioExp} onChangeText={setNovaDataInicioExp} />
+              <Input label="Descrição das Atividades" placeholder="Descreva suas tarefas e ferramentas..." value={novaDescricaoExp} onChangeText={setNovaDescricaoExp} multiline />
+              <View className="flex-row gap-2 mt-2">
+                <Button title="Cancelar" variant="secondary" className="flex-1" onPress={() => setModalExp(false)} />
+                <Button title="Salvar Experiência" className="flex-1" onPress={salvarNovaExp} />
+              </View>
+            </Pressable>
           </Pressable>
-        </Pressable>
+        </KeyboardAvoidingView>
       </Modal>
     </View>
   );

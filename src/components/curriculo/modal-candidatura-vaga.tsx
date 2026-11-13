@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Modal, Pressable, ScrollView, Text, View } from 'react-native';
+import { KeyboardAvoidingView, Modal, Platform, Pressable, ScrollView, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { type Vaga } from '@/data/vagas';
 import { useCurriculoGeral, curriculoActions } from '@/hooks/use-curriculo';
@@ -62,7 +62,11 @@ export function ModalCandidaturaVaga({
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
-      <Pressable onPress={onClose} className="flex-1 bg-black/60 justify-end">
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        className="flex-1"
+      >
+        <Pressable onPress={onClose} className="flex-1 bg-black/60 justify-end">
         <Pressable className="bg-white dark:bg-slate-900 rounded-t-3xl p-6 max-h-[85%] border-t border-slate-200 dark:border-slate-800">
           <View className="flex-row items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
             <View>
@@ -174,6 +178,7 @@ export function ModalCandidaturaVaga({
           </View>
         </Pressable>
       </Pressable>
-    </Modal>
+    </KeyboardAvoidingView>
+  </Modal>
   );
 }

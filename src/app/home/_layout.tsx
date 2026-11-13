@@ -27,6 +27,8 @@ const icon = (name: IconName) =>
     return <Ionicons name={name} color={color} size={size} />;
   };
 
+const renderHeader = () => <HomeHeader />;
+
 export default function HomeLayout() {
   const router = useRouter();
   const isDark = useColorScheme().colorScheme === 'dark';
@@ -35,12 +37,18 @@ export default function HomeLayout() {
   return (
     <Tabs
       screenOptions={{
-        header: () => <HomeHeader />,
+        header: renderHeader,
+        headerStyle: {
+          elevation: 8,
+          zIndex: 50,
+        },
         tabBarActiveTintColor: '#6366f1',
         tabBarInactiveTintColor: isDark ? '#94a3b8' : '#64748b',
         tabBarStyle: {
           backgroundColor: isDark ? '#03031b' : '#f8fafc',
           borderTopColor: isDark ? '#1e1b4b' : '#e2e8f0',
+          elevation: 8,
+          zIndex: 50,
         },
       }}
     >

@@ -12,14 +12,16 @@ import {
   type CertificacaoOuCurso,
   criarCurriculoGeralVazio,
   gerarCurriculoVaga,
+  MOCK_CURRICULO_GERAL,
+  MOCK_CURRICULOS_VAGAS,
 } from '@/data/curriculo';
 import { curriculoService } from '@/services/curriculo-service';
 import { perfilActions } from '@/hooks/use-perfil';
 import { inscricoesActions } from '@/hooks/use-inscricoes';
 
 // Store global em memória com listeners reativos para useSyncExternalStore
-let curriculoGeral: CurriculoGeral | null = null;
-let curriculosVagas: CurriculoVaga[] = [];
+let curriculoGeral: CurriculoGeral | null = { ...MOCK_CURRICULO_GERAL };
+let curriculosVagas: CurriculoVaga[] = [...MOCK_CURRICULOS_VAGAS];
 let usuarioIdCarregado: string | null = null;
 
 const listenersGeral = new Set<() => void>();
@@ -40,7 +42,12 @@ export async function hidratarCurriculo(usuarioId?: string) {
     const vagas = await curriculoService.listarCurriculosVagas(id);
 
     curriculoGeral = geral;
-    curriculosVagas = vagas;
+    curriculosVagas =
+      vagas.length > 0
+        ? vagas
+        : id === '001' || id === 'aluno_padrao' || id.includes('undb.edu.br')
+        ? [...MOCK_CURRICULOS_VAGAS]
+        : [];
     usuarioIdCarregado = id;
 
     notifyGeral();

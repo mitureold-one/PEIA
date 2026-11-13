@@ -12,6 +12,10 @@ export interface ProfileFormData {
   email: string;
   phone: string;
   avatar?: string;
+  cargo?: string;
+  instituicao?: string;
+  curso?: string;
+  abertoOportunidades?: boolean;
 }
 
 export type ProfileFormErrors = Partial<Record<keyof ProfileFormData, string>>;
@@ -22,6 +26,10 @@ const INITIAL_FORM: ProfileFormData = {
   email: '',
   phone: '',
   avatar: undefined,
+  cargo: '',
+  instituicao: '',
+  curso: '',
+  abertoOportunidades: true,
 };
 
 export function useProfileForm() {
@@ -41,6 +49,10 @@ export function useProfileForm() {
         email: perfil.email ?? '',
         phone: perfil.phone ?? '',
         avatar: perfil.avatar,
+        cargo: perfil.cargo ?? 'Estudante de Tecnologia',
+        instituicao: perfil.instituicao ?? 'UNDB',
+        curso: perfil.curso ?? 'Graduação',
+        abertoOportunidades: perfil.abertoOportunidades ?? true,
       });
     }
   }, [perfil]);
@@ -116,6 +128,10 @@ export function useProfileForm() {
       phone: trimmedPhone,
       avatar: dados.avatar,
       role: perfil?.role,
+      cargo: dados.cargo?.trim(),
+      instituicao: dados.instituicao?.trim(),
+      curso: dados.curso?.trim(),
+      abertoOportunidades: dados.abertoOportunidades,
     });
 
     // Persistência no SQLite / UserService
@@ -127,6 +143,10 @@ export function useProfileForm() {
         user.surname = trimmedSurname;
         user.phone = trimmedPhone;
         user.avatar = dados.avatar;
+        (user as any).cargo = dados.cargo?.trim();
+        (user as any).instituicao = dados.instituicao?.trim();
+        (user as any).curso = dados.curso?.trim();
+        (user as any).abertoOportunidades = dados.abertoOportunidades;
         await userService.save(user);
       }
     } catch {

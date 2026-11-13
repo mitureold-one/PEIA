@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { ScrollView, Text, TouchableOpacity, View } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView, Text, TouchableOpacity, View } from 'react-native';
 import { useRouter } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
@@ -166,7 +166,11 @@ export default function GestaoUsuarios() {
 
   return (
     <SafeAreaView edges={['bottom']} className="flex-1 bg-slate-50 dark:bg-[#03031b]">
-      <ScrollView contentContainerClassName="gap-6 p-6" keyboardShouldPersistTaps="handled">
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        className="flex-1"
+      >
+        <ScrollView contentContainerClassName="gap-6 p-6" keyboardShouldPersistTaps="handled">
         {/* Banner do Perfil Atual */}
         <View className="rounded-2xl bg-indigo-600 dark:bg-indigo-900/60 p-4 shadow-lg shadow-indigo-500/20">
           <View className="flex-row items-center gap-3">
@@ -366,9 +370,10 @@ export default function GestaoUsuarios() {
           })}
         </View>
       </ScrollView>
+    </KeyboardAvoidingView>
 
-      <AlertModal {...alert} onClose={() => setAlert((prev) => ({ ...prev, visible: false }))} />
-    </SafeAreaView>
+    <AlertModal {...alert} onClose={() => setAlert((prev) => ({ ...prev, visible: false }))} />
+  </SafeAreaView>
   );
 }
 

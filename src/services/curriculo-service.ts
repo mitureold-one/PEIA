@@ -9,6 +9,7 @@ import {
   converterLegadoParaCurriculoGeral,
   converterCurriculoGeralParaLegado,
   MOCK_CURRICULO_GERAL,
+  MOCK_CURRICULOS_VAGAS,
 } from '@/data/curriculo';
 
 const DB_NAME = 'peia.db';
@@ -118,8 +119,13 @@ export const curriculoService = {
       // Sem legado válido
     }
 
-    // 4. Se for o usuário de demonstração padrão (John Doe), carrega o mock preenchido
-    if (idNormalizado.includes('john') || idNormalizado.includes('001')) {
+    // 4. Se for o usuário de demonstração padrão (John Doe ou aluno_padrao), carrega o mock preenchido
+    if (
+      idNormalizado.includes('john') ||
+      idNormalizado.includes('001') ||
+      idNormalizado.includes('aluno') ||
+      idNormalizado === 'aluno_padrao'
+    ) {
       const inicial = { ...MOCK_CURRICULO_GERAL, usuarioId: idNormalizado };
       await curriculoService.salvarCurriculoGeral(inicial);
       return inicial;
@@ -231,10 +237,16 @@ export const curriculoService = {
       const stored = await AsyncStorage.getItem(key);
       if (stored) {
         const list: CurriculoVaga[] = JSON.parse(stored);
-        return list.find((c) => c.vagaId === vagaId) ?? null;
+        const match = list.find((c) => c.vagaId === vagaId);
+        if (match) return match;
       }
     } catch {
       // Ignora
+    }
+
+    if (idNormalizado === '001' || idNormalizado === 'aluno_padrao' || idNormalizado.includes('undb.edu.br')) {
+      const mockMatch = MOCK_CURRICULOS_VAGAS.find((c) => c.vagaId === vagaId);
+      if (mockMatch) return mockMatch;
     }
 
     return null;
@@ -253,7 +265,9 @@ export const curriculoService = {
           'SELECT dadosJson FROM curriculos_vagas WHERE usuarioId = ? ORDER BY dataEnvio DESC;',
           [idNormalizado]
         );
-        return rows.map((r) => JSON.parse(r.dadosJson));
+        if (rows.length > 0) {
+          return rows.map((r) => JSON.parse(r.dadosJson));
+        }
       } catch {
         // Fallback
       }
@@ -262,10 +276,19 @@ export const curriculoService = {
     try {
       const key = `${KEY_PREFIX_VAGAS}${idNormalizado}`;
       const stored = await AsyncStorage.getItem(key);
-      return stored ? JSON.parse(stored) : [];
+      if (stored) {
+        const list: CurriculoVaga[] = JSON.parse(stored);
+        if (list.length > 0) return list;
+      }
     } catch {
-      return [];
+      // Ignora
     }
+
+    if (idNormalizado === '001' || idNormalizado === 'aluno_padrao' || idNormalizado.includes('undb.edu.br')) {
+      return [...MOCK_CURRICULOS_VAGAS];
+    }
+
+    return [];
   },
 
   /**

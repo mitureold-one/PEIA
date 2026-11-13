@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react';
 import {
+  KeyboardAvoidingView,
   Modal,
+  Platform,
   Pressable,
   ScrollView,
   Text,
@@ -62,11 +64,15 @@ export function ProfileMetricDialogModal<T>({
       statusBarTranslucent
       onRequestClose={handleClose}
     >
-      {/* Backdrop com fundo escuro translúcido - toque fora fecha */}
-      <Pressable
-        onPress={handleClose}
-        className="flex-1 bg-black/70 backdrop-blur-md items-center justify-center p-4 sm:p-6"
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        className="flex-1"
       >
+        {/* Backdrop com fundo escuro translúcido - toque fora fecha */}
+        <Pressable
+          onPress={handleClose}
+          className="flex-1 bg-black/70 backdrop-blur-md items-center justify-center p-4 sm:p-6"
+        >
         {/* Card do Modal Centralizado */}
         <Pressable
           onPress={(e) => e.stopPropagation()}
@@ -156,6 +162,7 @@ export function ProfileMetricDialogModal<T>({
           </View>
         </Pressable>
       </Pressable>
-    </Modal>
+    </KeyboardAvoidingView>
+  </Modal>
   );
 }

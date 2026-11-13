@@ -56,15 +56,17 @@ PEIA/
 │   │   ├── conversas/         # Cards de feedback, diagnóstico de currículo e chat de candidaturas
 │   │   ├── curriculo/         # Gestão de currículo geral e modais de candidatura direcionada
 │   │   ├── home/              # Header, filtros, cards e empty state do feed de vagas
-│   │   ├── profile/           # Componentes modulares da tela de perfil (Header, Dados, Inscrições, Admin)
-│   │   ├── scan/              # Componentes de leitura de currículo (Câmera, Arquivo, Preview)
+│   │   ├── profile/           # Componentes modulares da tela de perfil (Views por persona, Header, Info, Counters, PhotoModal, AcademicEditModal, MetricModals, Summary, Education, Experience, Skills, Wall, Interests, Admin)
+│   │   ├── scan/              # Componentes modulares de leitura de currículo (Header, Tabs de modo, Câmera, Arquivo, Feedback, Preview)
 │   │   └── ui/                # Primitivos de UI acessíveis (Button, Input, AlertModal, ThemeToggle, ProfileMetricDialogModal)
 │   ├── constants/             # Constantes globais
 │   │   ├── routes.ts          # Nomes e caminhos tipados de rotas (`ROUTES`)
 │   │   └── theme.ts           # Definições de cores e tokens de tema
 │   ├── data/                  # Entidades de domínio, schemas e mocks
+│   │   ├── avaliacoes.ts      # Modelagem de Avaliações, Recomendações e depoimentos
 │   │   ├── curriculo.ts       # Modelagem de Currículo Geral (Master) e Currículo Direcionado para Vaga
 │   │   ├── feedback.ts        # Modelagem de Diagnóstico IA, Match Score e Mensagens de Candidatura
+│   │   ├── social.ts          # Entidades e listas base de empresas recomendadas e conexões de estudantes
 │   │   ├── user.ts            # Entidade de domínio User e personas (Aluno, Empresa, Admin, Super Admin)
 │   │   └── vagas.ts           # Interface Vaga, constantes de áreas, modalidades e mocks
 │   ├── hooks/                 # Custom hooks e stores de estado reativos
@@ -72,6 +74,7 @@ PEIA/
 │   │   ├── use-auth-form.ts   # Lógica e validação da interface de autenticação
 │   │   ├── use-conversas.ts   # Store reativo de conversas e diagnósticos de candidatura
 │   │   ├── use-profile-form.ts# Orquestração de estado e validação do formulário de perfil
+│   │   ├── use-profile-student-header.ts # Orquestração de dados, filtros A-Z e modais do cabeçalho do estudante
 │   │   ├── use-vagas-feed.ts  # Orquestração de busca e filtros do feed de vagas
 │   │   ├── use-companies-management.ts # Lógica e formulário de empresas conveniadas
 │   │   ├── use-curriculo-scanner.ts    # Orquestração de câmera, arquivo e OCR
@@ -135,8 +138,9 @@ Para garantir alta performance em produção sem quebrar o ambiente de desenvolv
 
 ### 3.3. Separação de Perfis (Personas) e Regras de Negócio
 O sistema adota a entidade de domínio `User` (`src/data/user.ts`) com hierarquia clara:
-- **Aluno (Estudante):**
-  - Cadastro público permitido.
+- **Aluno (Estudante - Subclasse `Aluno extends User`):**
+  - Cadastro público permitido e modelagem orientada a objetos com a subclasse `Aluno`.
+  - Encapsula campos acadêmicos próprios (`cargo`, `instituicao`, `curso`, `abertoOportunidades`) com operações CRUD e persistência no SQLite e store reativo.
   - Pode buscar e filtrar vagas no feed.
   - Pode escanear ou carregar currículo para preenchimento automático.
   - Pode se candidatar a vagas de estágio (inscrições salvas localmente).

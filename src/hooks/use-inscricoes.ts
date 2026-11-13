@@ -3,7 +3,8 @@ import { useSyncExternalStore } from 'react';
 import { Platform } from 'react-native';
 
 const KEY = 'peia:inscricoes';
-let inscricoes: string[] = [];
+const DEFAULT_INSCRICOES = ['1', '2'];
+let inscricoes: string[] = [...DEFAULT_INSCRICOES];
 const listeners = new Set<() => void>();
 
 const notify = () => listeners.forEach((l) => l());
@@ -14,7 +15,8 @@ if (Platform.OS !== 'web' || typeof window !== 'undefined') {
     .then((value) => {
       if (value) {
         try {
-          inscricoes = JSON.parse(value);
+          const parsed = JSON.parse(value);
+          inscricoes = Array.isArray(parsed) ? parsed : [...DEFAULT_INSCRICOES];
           notify();
         } catch {
           // Formato inválido ignorado

@@ -1,4 +1,4 @@
-import { ScrollView } from 'react-native';
+import { KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useUserRole } from '@/hooks/use-user-role';
 import { usePerfil } from '@/hooks/use-perfil';
@@ -21,15 +21,20 @@ export default function Profile() {
 
   return (
     <SafeAreaView edges={[]} className="flex-1 bg-slate-50 dark:bg-[#03031b]">
-      <ScrollView
-        contentContainerClassName="gap-5 p-6"
-        keyboardShouldPersistTaps="handled"
-        showsVerticalScrollIndicator={false}
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        className="flex-1"
       >
-        {role === 'estudante' && <StudentProfileView />}
-        {role === 'empresa' && <CompanyProfileView />}
-        {isCoordenacaoOuAdmin && <CoordinationProfileView />}
-      </ScrollView>
+        <ScrollView
+          contentContainerClassName="gap-5 p-6"
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          {role === 'estudante' && <StudentProfileView />}
+          {role === 'empresa' && <CompanyProfileView />}
+          {isCoordenacaoOuAdmin && <CoordinationProfileView />}
+        </ScrollView>
+      </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }

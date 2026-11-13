@@ -130,6 +130,10 @@ export default function VagaDetalhe() {
         onCancelSuccess={() => {
           Alert.alert('Candidatura cancelada', 'Sua inscrição foi removida desta vaga.');
         }}
+        onEditCandidatura={() => {
+          setModalVisualizar(false);
+          setModalCandidatura(true);
+        }}
       />
 
       {/* Ações de Gestão (Empresa e Administração) */}

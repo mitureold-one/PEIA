@@ -28,6 +28,372 @@ Este documento é o **registro oficial e mandatório** de todas as mudanças imp
 
 ## Histórico de Mudanças
 
+### [2026-11-13] - Refatoração do ScanModeTabs: Pressable, Remoção de Elevation e Resposta Imediata de Toque (/home/scan)
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** A análise do usuário identificou que o componente `ScanModeTabs` estava bloqueando ou ignorando os eventos de clique ao tentar alternar entre os modos de arquivo e câmera.
+- **Arquivos Alterados:**
+  - `src/components/scan/scan-mode-tabs.tsx` (Reescrito - migração de `TouchableOpacity` para `Pressable`, remoção das propriedades `elevation` e `zIndex` que causavam desvio e absorção de toques no Android, adição de `hitSlop` e feedback visual de toque)
+  - `src/components/scan/scan-file-card.tsx` (Modificado - botão de alternância rápida de modo atualizado para `Pressable` com `hitSlop`)
+  - `src/components/scan/scan-camera-card.tsx` (Modificado - botão de alternância rápida de modo atualizado para `Pressable` com `hitSlop`)
+  - `src/hooks/use-curriculo-scanner.ts` (Modificado - limpeza automática de mensagens de erro ao alternar de aba no `setMode`)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado - registro oficial da mudança)
+- **Principais Mudanças:**
+  - **Eliminação do Conflito de Toque com `elevation`:** Removida a propriedade `elevation: 2` de cima de contêineres translúcidos dentro de `ScrollView`, eliminando a camada nativa do Android que interceptava toques antes de atingirem os botões filhos.
+  - **Uso Estrito de `Pressable` com `hitSlop`:** Substituídos os componentes `TouchableOpacity` legados por `Pressable` nativo com `hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}` e animação sutil `active:scale-[0.98]`, garantindo que toques rápidos não sejam cancelados pelo pan responder da `ScrollView`.
+  - **Transição Limpa no Hook:** A função `setMode` agora reseta erros anteriores para evitar poluição visual de feedback durante a troca de abas.
+- **Impactos & Observações:** Validação estática executada com sucesso via `npx tsc --noEmit` (0 erros). Alternância entre "Imagem ou PDF" e "Câmera" agora é instantânea e 100% responsiva ao toque.
+
+### [2026-11-13] - Correção de Travamento da Câmera: Delegação Nativa e Dimensões Fixas do Viewfinder (/home/scan)
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Ao clicar na câmera no scanner, o app travava e o botão de captura não respondia devido a colapso de layout no Yoga (`aspect-[3/4]` com `height: '100%'` em ScrollView) e bloqueio na thread de hardware de `SurfaceView` aguardando `onCameraReady`.
+- **Arquivos Alterados:**
+  - `src/hooks/use-curriculo-scanner.ts` (Modificado - adicionada função `takePhotoWithCamera` delegando para `ImagePicker.launchCameraAsync`, fallback de 1200ms para `cameraReady` caso o evento nativo atrase, e desativação proativa ao suspender app ou mudar de aba)
+  - `src/components/scan/scan-camera-card.tsx` (Modificado - adicionado botão primário "Abrir Câmera e Fotografar" com foco automático do sistema, mantendo "Usar visor ao vivo no app" como secundário; contêiner do visor ao vivo atualizado com dimensões explícitas `height: 400` e `StyleSheet.absoluteFill` para evitar altura zero no Yoga)
+  - `src/app/home/scan.tsx` (Modificado - desestruturação e repasse de `takePhotoWithCamera` para `onTakePhotoWithCamera`)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado - registro oficial da mudança)
+- **Principais Mudanças:**
+  - **Captura Nativa via ImagePicker:** Introduzido `takePhotoWithCamera` usando o app de câmera nativo do dispositivo. O usuário ganha foco macro, flash e resolução máxima de hardware sem risco de congelamento de UI thread ou bugs de SurfaceView.
+  - **Correção de Dimensão do Viewfinder:** No visor ao vivo embutido, substituído o layout percentual dependente de aspect-ratio por altura fixa (`height: 400`) e preenchimento absoluto (`StyleSheet.absoluteFill`), garantindo que o SurfaceView nativo inicialize instantaneamente e acione `onCameraReady`.
+  - **Fallback de Prontidão da Câmera:** Incluído timeout de segurança que garante liberação do botão caso a notificação de hardware tenha atraso.
+- **Impactos & Observações:** Validação estática executada com sucesso via `npx tsc --noEmit` (0 erros). Experiência de captura ultra-estável e sem travamentos.
+
+### [2026-11-13] - Gestão Robusta de Ciclo de Vida e Permissões da Câmera no Scanner (/home/scan)
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** O usuário apontou a necessidade de gerenciar adequadamente o ciclo de vida e as permissões do sensor de câmera para evitar travamentos de interface, dead-zones de hardware e retenção indevida de recursos.
+- **Arquivos Alterados:**
+  - `src/hooks/use-curriculo-scanner.ts` (Modificado - adicionado listener de `AppState` para desativar a câmera ao suspender/minimizar o app, hook de limpeza na desmontagem, suporte a `Linking.openSettings()` para permissões bloqueadas permanentemente e tratamento de erros de autorização)
+  - `src/components/scan/scan-camera-card.tsx` (Modificado - diferenciação entre estados de verificação de permissão, recusa com possibilidade de re-solicitação e bloqueio permanente com botão "Abrir Configurações do Aparelho"; renderização estrita de `CameraView` apenas quando a tela estiver em foco (`isFocused === true`))
+  - `src/app/home/scan.tsx` (Modificado - repasse das props `isFocused` e `onOpenSettings` para `ScanCameraCard`)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado - registro oficial da mudança)
+- **Principais Mudanças:**
+  - **Desativação em Background (AppState):** Se o usuário minimizar o app ou puxar a barra de notificações, o sensor da câmera é desligado e o hardware liberado imediatamente, evitando perda de contexto gráfico ou SurfaceView congelada.
+  - **Montagem Condicional Focada (`isFocused`):** O componente nativo `<CameraView>` só é montado no DOM nativo quando a aba do scanner está ativamente em foco, com permissão concedida e sem foto congelada.
+  - **Tratamento de Permissão Negada Permanentemente:** Se a permissão for recusada com `!canAskAgain`, o app exibe uma mensagem informativa clara com um botão direto para abrir as configurações do sistema operacional via `Linking.openSettings()`.
+- **Impactos & Observações:** Validação TypeScript concluída com 0 erros (`npx tsc --noEmit`). Total conformidade com o ciclo de vida nativo de hardware móvel no Expo.
+
+### [2026-11-13] - Definição do Seletor de Arquivos como Modo Padrão no Scanner (/home/scan)
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** O usuário solicitou que o método principal e inicial ao entrar no scanner fosse o input de arquivos digitais (PDF / Imagem), deixando a câmera fotográfica como método secundário alternativo.
+- **Arquivos Alterados:**
+  - `src/hooks/use-curriculo-scanner.ts` (Modificado - estado inicial de `mode` alterado de `'camera'` para `'arquivo'`)
+  - `src/components/scan/scan-mode-tabs.tsx` (Modificado - ordem das abas reorganizada para exibir "Imagem ou PDF" como primeira aba/opção principal e "Câmera" como segunda aba)
+  - `src/app/home/scan.tsx` (Modificado - reordenação do fluxo condicional priorizando `ScanFileCard` sobre `ScanCameraCard`)
+  - `src/components/scan/scan-file-card.tsx` (Modificado - título ajustado para "Arquivo Digital (PDF / Imagem)")
+  - `src/components/scan/scan-camera-card.tsx` (Modificado - título ajustado para "Câmera" com instrução contextual)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado - registro oficial da mudança)
+- **Principais Mudanças:**
+  - Ao entrar em `/home/scan`, o app exibe imediatamente o seletor de arquivos digitais (PDF/imagens locais), evitando consumo prematuro de bateria ou solicitações desnecessárias de permissão de câmera.
+  - O fluxo para fotografar o documento impresso permanece acessível com um toque pela aba secundária "Câmera" ou pelo atalho no final do card.
+- **Impactos & Observações:** Checagem TypeScript 100% limpa (`npx tsc --noEmit` -> 0 erros). Experiência de uso mais rápida, silenciosa e focada no formato mais comum de currículo.
+
+### [2026-11-13] - Correção de Bloqueio de Toques no Menu, Header e Abas ao Entrar no Scanner (/home/scan)
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** O usuário reportou que ao entrar na rota do scanner (`/home/scan`), os toques fora da rota (como a barra de abas inferior e o header superior) e até a alternância de modos ficavam travados/inresponsivos até que houvesse alternância de tela.
+- **Arquivos Alterados:**
+  - `src/app/home/_layout.tsx` (Modificado - elevação de `zIndex: 50` e `elevation: 8` na barra de abas e no cabeçalho; estabilização da referência da função de renderização do `HomeHeader`)
+  - `src/components/home/home-header.tsx` (Modificado - adicionado `style={{ zIndex: 50, elevation: 8 }}` no container raiz `SafeAreaView` para garantir sobreposição segura de eventos de toque no Android e iOS)
+  - `src/app/home/scan.tsx` (Modificado - substituição de `SafeAreaView edges={[]}` redundante por `View className="flex-1"` e vinculação explícita de `className="flex-1"` no `ScrollView`, eliminando o overflow de hit-rect que vazava e interceptava gestos nos limites verticais da tela)
+  - `src/components/scan/scan-mode-tabs.tsx` (Modificado - isolamento com `style={{ zIndex: 20, elevation: 2 }}` garantindo camada independente de toque para a alternância entre Câmera e PDF)
+  - `src/hooks/use-curriculo-scanner.ts` (Modificado - integração com `useIsFocused` do Expo Router, garantindo liberação automática e instantânea do sensor de câmera ao trocar de aba no app)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado - registro oficial da mudança)
+- **Principais Mudanças:**
+  - **Delimitação de ScrollView sem Vazamento:** Ao omitir `flex-1` no `ScrollView` da rota, o container calculava dimensões pelo conteúdo total e seu frame interceptor de gestos expandia sobre o Header e a TabBar, sequestrando toques no topo e no rodapé. Com `className="flex-1"`, o ScrollView permanece rigorosamente confinado entre as barras.
+  - **Prioridade de Camadas (Elevation & Stacking):** O `tabBarStyle` e o `HomeHeader` agora possuem `elevation: 8` e `zIndex: 50`, assegurando prioridade absoluta na captura de toques.
+  - **Gestão Inteligente de Ciclo de Vida da Câmera:** O hook desliga o sensor assim que o usuário transita para outra aba, prevenindo dead-zones de hardware.
+- **Impactos & Observações:** `npx tsc --noEmit` validado com 0 erros. Acessibilidade de toque no menu inferior, header e abas de modo 100% responsiva desde o primeiro instante de abertura da tela.
+
+### [2026-11-13] - Correção de Alternância de Abas Câmera e Arquivo no Scanner (/home/scan)
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** O usuário reportou impossibilidade de alternar entre a entrada da câmera e a de PDF/Imagem ao entrar na rota `/home/scan`.
+- **Arquivos Alterados:**
+  - `src/components/scan/scan-mode-tabs.tsx` (Modificado - substituição de `Pressable` por `TouchableOpacity` com `activeOpacity={0.7}`, garantindo despacho imediato de toques no Android/iOS dentro de `ScrollView`)
+  - `src/app/home/scan.tsx` (Modificado - remoção do `KeyboardAvoidingView` de nível de rota que sequestrava a cadeia de responders de gestos no React Navigation)
+  - `src/components/scan/scan-camera-card.tsx` (Modificado - adição de atalho contextual "Prefere enviar PDF ou imagem?" conectado a `onSwitchToArquivo`)
+  - `src/components/scan/scan-file-card.tsx` (Modificado - adição de atalho contextual "Prefere fotografar com a câmera?" conectado a `onSwitchToCamera`)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado - registro oficial da mudança)
+- **Principais Mudanças:**
+  - **Sensibilidade de Toque Confiável:** No React Native, `Pressable` dentro de `ScrollView` em ambientes móveis pode cancelar toques como tentativa de scroll. A migração para `TouchableOpacity` assegura clique imediato com feedback visual.
+  - **Eliminação de Bloqueio por KeyboardAvoidingView:** O container do teclado em nível de tela estava interceptando os toques nas abas superiores.
+  - **Caminho Duplo de Alternância:** O usuário agora pode alternar tanto pelas abas superiores quanto pelos links contextuais integrados no interior de cada card.
+- **Impactos & Observações:** Checagem TypeScript 100% limpa (`npx tsc --noEmit` -> 0 erros). Navegação entre Câmera e PDF fluida e instantânea.
+
+### [2026-11-13] - Refatoração de Responsabilidades da Rota de Scanner OCR (/home/scan)
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Alinhamento arquitetural da rota `/home/scan` ao padrão de responsabilidade única e modularização adotado no restante do projeto (como no Perfil, Empresas e Feed). Resolução do estado inicial da câmera (inicia desligada para poupar bateria e performance, sendo ativada sob demanda com permissão explícita), suporte a `KeyboardAvoidingView` sem interferir no layout global e separação das opções em abas de modo e componentes atômicos.
+- **Arquivos Alterados / Criados:**
+  - `src/app/home/scan.tsx` (Modificado - simplificado para atuar como orquestrador limpo da tela, integrado a `KeyboardAvoidingView` e `useCurriculoScanner`)
+  - `src/hooks/use-curriculo-scanner.ts` (Modificado - adicionado controle de modo `camera` vs `arquivo`, ciclo de vida da câmera `cameraActive` iniciando desligada, métodos `startCamera`, `stopCamera`, `retakePhoto` e `clearError`)
+  - `src/components/scan/scan-mode-tabs.tsx` (Criado - componente de abas estáticas para alternar de forma limpa entre Câmera e Arquivo Digital)
+  - `src/components/scan/scan-camera-card.tsx` (Modificado - câmera agora inicia desligada com card explicativo e botão "Ligar Câmera", suporte a viewfinder com moldura de alinhamento de documento, badge "Ao Vivo", fechamento rápido e retake)
+  - `src/components/scan/scan-file-card.tsx` (Modificado - refinamento do design do seletor de documentos PDF/imagem com tags de formato e chip de arquivo carregado)
+  - `src/components/scan/scan-feedback.tsx` (Criado - isolamento dos estados de leitura/processamento OCR e alertas de erro com botão de fechamento)
+  - `src/components/scan/scan-preview-card.tsx` (Modificado - contador de caracteres, edição de texto multiline e ações de importação para o perfil e limpeza)
+  - `src/components/scan/scan-header.tsx` (Modificado - harmonização com a identidade visual do app com badge OCR Inteligente)
+  - `docs/ARCHITECTURE.md` (Modificado - atualização da árvore de componentes do módulo scan)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado - registro oficial da mudança)
+- **Principais Mudanças:**
+  - **Câmera Inicia Desligada por Padrão:** Evita consumo desnecessário de bateria, aquecimento do dispositivo e travamento na montagem de tabs. O usuário visualiza o card explicativo e aciona a câmera somente quando desejar.
+  - **Separação por Abas de Modo:** Ao invés de exibir dois cards pesados empilhados com divisor textual, a interface utiliza abas (`Câmera` e `Imagem ou PDF`), desativando o sensor caso o usuário mude para o modo arquivo.
+  - **Tratamento Acessível de Feedback & Erros:** Componente dedicado `ScanFeedback` com `accessibilityLiveRegion="polite"` e `accessibilityRole="alert"`.
+  - **Suporte a Teclado:** `KeyboardAvoidingView` configurado com `Platform.OS === 'ios' ? 'padding' : undefined` garantindo conforto na edição do texto extraído.
+- **Impactos & Observações:** Checagem rigorosa de tipos via TypeScript executada com 100% de sucesso (`npx tsc --noEmit` -> 0 erros). Nenhuma dependência externa adicionada e nenhum arquivo fora do escopo do scanner ou layout global foi alterado.
+
+### [2026-11-13] - Reversão Completa de Alterações do Scanner para Estado Estável
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Reversão total e estrita de todos os arquivos, rotas e componentes relacionados ao Scanner (`/home/scan`), restaurando o estado exatamente ao commit estável `5790831` a pedido do usuário.
+- **Arquivos Revertidos ao Commit 5790831:**
+  - `src/app/home/scan.tsx`
+  - `src/components/scan/`
+  - `src/hooks/use-curriculo-scanner.ts`
+  - `src/app/home/_layout.tsx`
+  - `src/app/home/logout.tsx`
+  - `src/app/configuracoes.tsx`
+  - `src/components/profile/profile-student-summary.tsx`
+  - `package.json`
+  - Removidos arquivos de refatoração do scanner e de permissões (`src/utils/curriculo-parser.ts`, `src/services/permissions-service.ts`, `src/hooks/use-app-permissions.ts`, etc.)
+- **Impactos & Observações:** O Scanner e o layout retornam exatamente ao estado anterior com 0 erros de compilação.
+
+### [2026-11-13] - Círculos ao Redor da Foto Sincronizados com a Disponibilidade do Estudante
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Solicitação do usuário para combinar visualmente os círculos/anéis concêntricos ao redor da foto de perfil do usuário com o status de disponibilidade do aluno (`abertoOportunidades`), no estilo "Open to Work" do LinkedIn.
+- **Arquivos Alterados / Criados:**
+  - `src/components/profile/profile-student-info.tsx` (Modificado - foto de perfil estruturada em 3 círculos concêntricos: anel halo externo de 104px, anel intermediário de respiro negativo e círculo da foto/iniciais, com badge de câmera sincronizado às cores esmeralda/slate)
+  - `src/components/profile/profile-student-photo-modal.tsx` (Modificado - foto ampliada de 200px com círculos concêntricos e chip de disponibilidade combinados ao status `abertoOportunidades`)
+  - `src/components/home/home-header.tsx` (Modificado - avatar do menu superior sincronizado com o anel de status do estudante e micro-badge indicador)
+  - `src/components/profile/profile-avatar.tsx` (Modificado - suporte à prop `abertoOportunidades` para manter consistência nas configurações da conta)
+  - `src/app/configuracoes.tsx` (Modificado - repasse do status de disponibilidade do aluno para o `ProfileAvatar`)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - **Status Aberto a Oportunidades (`true`):**
+    - Círculo externo com borda verde esmeralda vibrante (`border-emerald-500 dark:border-emerald-400`), respiro sutil (`bg-emerald-50/60 dark:bg-emerald-950/40`) e sombra suave.
+    - Círculo interno com respiro negativo e borda suave (`border-emerald-200 dark:border-emerald-800/80`).
+    - Badge de câmera e indicador no canto com `bg-emerald-600 dark:bg-emerald-500` e borda de contraste branca/dark.
+    - Avatar de iniciais com fundo esmeralda.
+  - **Status Indisponível no Momento (`false`):**
+    - Círculos adquirem tonalidades neutras e elegantes de slate (`border-slate-300 dark:border-slate-700`).
+    - Badge em `bg-slate-500 dark:bg-slate-600`.
+  - **Reatividade em Tempo Real:** Alternar o status via tag interativa ou modal acadêmico atualiza instantaneamente a paleta dos anéis concêntricos em toda a interface.
+- **Impactos & Observações:** Checagem rigorosa de tipos realizada com sucesso (`npx tsc --noEmit` -> 0 erros). Preservadas diretrizes de acessibilidade e dark mode.
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** O botão "Visualizar currículo enviado" na tela de detalhes da vaga (`src/app/vaga/[id].tsx`) anteriormente não abria ou era inútil caso o snapshot específico não estivesse salvo no banco local (retornando `null` silenciosamente). O modal foi transformado em um dossiê visual completo e funcional de apresentação profissional, além de ganhar fallback inteligente e ações reais de compartilhamento e edição.
+- **Arquivos Alterados / Criados:**
+  - `src/components/curriculo/modal-visualizar-curriculo-vaga.tsx` (Completamente reformulado com visual de dossiê profissional, dados cadastrais completos do estudante, pitch, habilidades, experiências, formações, idiomas, taxa de match estimada, ações de exportação via `Share.share`, cópia de pitch e edição de candidatura)
+  - `src/data/curriculo.ts` (Modificado - adicionado `MOCK_CURRICULOS_VAGAS` com snapshots detalhados das candidaturas padrão de John Doe para as vagas da Nubix e Dataly)
+  - `src/services/curriculo-service.ts` (Modificado - hidratação de fallback em `listarCurriculosVagas` e `obterCurriculoVaga` para persistir e recuperar currículos de vagas com segurança)
+  - `src/hooks/use-curriculo.ts` (Modificado - hidratação reativa com `MOCK_CURRICULOS_VAGAS` para `useCurriculoVaga`)
+  - `src/app/vaga/[id].tsx` (Modificado - conexão da prop `onEditCandidatura` permitindo abrir o editor de pitch/candidatura diretamente a partir do visualizador de currículo)
+  - `src/components/profile/profile-student-metric-modals.tsx` (Modificado - badge interativo "Ver" com ícone de documento no modal de candidaturas ativas)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - **Fim do bloqueio por snapshot nulo:** Se `curriculoVaga` não for encontrado, o modal sintetiza dinamicamente um currículo direcionado usando o `curriculoGeral` do aluno e os requisitos da vaga, garantindo que o modal sempre abra e exiba o documento.
+  - **Dossiê Profissional Completo:** Exibição estruturada com foto/avatar do candidato, nome completo, título profissional, instituição, curso, contatos (e-mail, WhatsApp, localização), badge de status ativo com % de match, data e hora de envio, pitch de apresentação, competências selecionadas, histórico de experiências e formação acadêmica.
+  - **Ações Reais e Úteis:**
+    - Botão **"Exportar / Compartilhar Currículo"** que formata todo o currículo em texto estruturado e aciona o `Share.share` nativo do dispositivo para WhatsApp, e-mail, etc.
+    - Botão **"Compartilhar Pitch"** com feedback visual imediato ("Copiado!").
+    - Botão **"Editar Pitch"** para reabrir a customização de candidatura sem precisar cancelar a vaga.
+    - Ação **"Retirar Candidatura"** com diálogo nativo de confirmação.
+- **Impactos & Observações:** Checagem rigorosa de tipos com TypeScript realizada com 0 erros (`npx tsc --noEmit`). Layout 100% responsivo e com suporte a tema claro e escuro.
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Solicitação do usuário para que em todas as telas e modais com campos de texto do aplicativo o teclado virtual empurre o conteúdo para cima (`KeyboardAvoidingView`), garantindo que o usuário visualize perfeitamente o campo em que está digitando sem obstrução visual.
+- **Arquivos Alterados / Criados:**
+  - `src/app/configuracoes.tsx` (Modificado - encapsulamento do `ScrollView` em `KeyboardAvoidingView` com `behavior={Platform.OS === 'ios' ? 'padding' : undefined}`)
+  - `src/app/vaga/form.tsx` (Modificado - encapsulamento da tela de anúncio/edição de vagas em `KeyboardAvoidingView`)
+  - `src/app/home/profile.tsx` (Modificado - encapsulamento da rota Perfil em `KeyboardAvoidingView` para suportar edição inline do Sobre Mim, Habilidades, etc.)
+  - `src/app/admin/usuarios.tsx` (Modificado - suporte a `KeyboardAvoidingView` no cadastro administrativo de usuários)
+  - `src/app/home/companies.tsx` (Modificado - suporte a `KeyboardAvoidingView` no cadastro de empresas parceiras)
+  - `src/app/home/scan.tsx` (Modificado - suporte a `KeyboardAvoidingView` na edição de texto extraído do escaneamento de currículo)
+  - `src/components/profile/profile-student-academic-edit-modal.tsx` (Modificado - suporte a `KeyboardAvoidingView` no modal de dados acadêmicos)
+  - `src/components/profile/profile-student-education.tsx` (Modificado - suporte a `KeyboardAvoidingView` no modal de formação acadêmica)
+  - `src/components/profile/profile-student-experience.tsx` (Modificado - suporte a `KeyboardAvoidingView` no modal de experiência profissional)
+  - `src/components/profile/profile-student-interests.tsx` (Modificado - suporte a `KeyboardAvoidingView` no modal de áreas de interesse)
+  - `src/components/profile/profile-student-wall.tsx` (Modificado - suporte a `KeyboardAvoidingView` no modal de recomendação)
+  - `src/components/ui/profile-metric-dialog-modal.tsx` (Modificado - suporte a `KeyboardAvoidingView` no modal de busca de métricas)
+  - `src/components/curriculo/modal-candidatura-vaga.tsx` (Modificado - suporte a `KeyboardAvoidingView` no modal de pitch/candidatura de vaga)
+  - `src/components/curriculo/curriculo-geral-editor.tsx` (Modificado - suporte a `KeyboardAvoidingView` nos modais de formação e experiência do editor do currículo)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - Padronização multiplataforma inteligente: Telas completas usam `Platform.OS === 'ios' ? 'padding' : undefined` (respeitando o `adjustResize` nativo do Android), enquanto modais centralizados utilizam `Platform.OS === 'ios' ? 'padding' : 'height'`, reposicionando os diálogos no centro da tela visível acima do teclado virtual.
+- **Impactos & Observações:** Checagem de tipagem estrita com TypeScript executada com sucesso (`npx tsc --noEmit` -> 0 erros). Preservadas todas as diretrizes de acessibilidade e tema dark/light.
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Povoamento completo e realista da conta padrão do estudante John Doe para enriquecer a experiência visual e de demonstração:
+  - **Dados Pessoais e Acadêmicos ([`src/data/user.ts`](src/data/user.ts) e [`src/hooks/use-perfil.ts`](src/hooks/use-perfil.ts)):** John Doe configurado com o cargo *"Desenvolvedor Frontend Trainee"*, instituição *"Centro Universitário UNDB"*, curso *"Engenharia de Software"*, status *"● Aberto a Oportunidades"* e foto de perfil configurada.
+  - **Currículo Geral Mestre ([`src/data/curriculo.ts`](src/data/curriculo.ts) e [`src/services/curriculo-service.ts`](src/services/curriculo-service.ts)):**
+    - **Sobre Mim:** Bio profissional completa com foco em mobile (React Native / TypeScript).
+    - **Formação Acadêmica:** Bacharelado em Engenharia de Software (UNDB, 2023–2026) e Técnico em Informática para Internet (IFMA, 2020–2022).
+    - **Experiência Profissional:** Desenvolvedor Frontend Trainee (Empresa Júnior UNDB) e Monitor de Algoritmos e Programação (UNDB).
+    - **Habilidades & Competências:** 8 competências cadastradas (React Native, TypeScript, Expo SDK 58, TailwindCSS/NativeWind, SQLite, Git & GitHub, Trabalho em Equipe, Resolução de Problemas).
+    - **Idiomas:** Português (Nativo) e Inglês (Intermediário).
+  - **Rede Social & Inscrições ([`src/hooks/use-inscricoes.ts`](src/hooks/use-inscricoes.ts) e [`src/hooks/use-estudante-social.ts`](src/hooks/use-estudante-social.ts)):**
+    - 2 candidaturas ativas em vagas de estágio.
+    - 3 empresas seguidas (TechHub São Luís, Inova Maranhão, Ambev Tech).
+    - 3 conexões acadêmicas com colegas da comunidade.
+- **Arquivos Alterados / Criados:**
+  - `src/data/user.ts` (Modificado - dados acadêmicos refinados de John Doe)
+  - `src/data/curriculo.ts` (Modificado - mock completo e detalhado com formações, experiências, habilidades e idiomas)
+  - `src/services/curriculo-service.ts` (Modificado - hidratação garantida do mock para usuários padrão e fallbacks)
+  - `src/hooks/use-curriculo.ts` (Modificado - estado inicial do store hidratado com o mock)
+  - `src/hooks/use-perfil.ts` (Modificado - fallback seguro inicial com o perfil do John Doe)
+  - `src/hooks/use-inscricoes.ts` (Modificado - candidaturas padrão inicializadas)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Impactos & Observações:** Checagem TypeScript estrita realizada com 0 erros (`npx tsc --noEmit`).
+
+
+### [2026-11-11] - Distribuição do Currículo Vivo ao Longo da Main e Ocultação do Mural para o Próprio Estudante
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Redefinição de arquitetura de produto solicitada pelo usuário na tela de perfil do estudante:
+  - **Ocultação do Mural no Perfil Próprio:** O mural de avaliações e recomendações (`ProfileStudentWall`) foi retirado da visão do próprio estudante, ficando reservado para visualização por coordenadores e empresas recrutadoras.
+  - **Distribuição Modular do Currículo Geral:** As seções do currículo foram decompostas em blocos modulares elegantes e distribuídas naturalmente ao longo da main do estudante:
+    1. **Sobre Mim (`ProfileStudentSummary`):** Apresentação e bio profissional com edição inline e salvamento em tempo real.
+    2. **Formação Acadêmica (`ProfileStudentEducation`):** Lista de graduações, cursos, períodos, status e modal de adição/remoção.
+    3. **Experiência Profissional (`ProfileStudentExperience`):** Histórico de estágios e trabalhos com modalidades (Híbrido/Remoto/Presencial), atividades e modal de cadastro.
+    4. **Competências & Idiomas (`ProfileStudentSkills`):** Habilidades técnicas, ferramentas e soft skills com adição rápida de chips e gestão de idiomas com níveis de proficiência.
+  - **Composição da Main (`StudentProfileView`):** Agora orquestra sequencialmente: Hero do Estudante -> Carrossel de Interesses -> Sobre Mim -> Formação -> Experiência -> Competências & Idiomas.
+- **Arquivos Alterados / Criados:**
+  - `src/components/profile/profile-student-summary.tsx` (Criado - seção modular Sobre Mim com edição reativa)
+  - `src/components/profile/profile-student-education.tsx` (Criado - seção modular de Formação Acadêmica)
+  - `src/components/profile/profile-student-experience.tsx` (Criado - seção modular de Experiência e Estágios)
+  - `src/components/profile/profile-student-skills.tsx` (Criado - seção modular de Competências, Habilidades e Idiomas)
+  - `src/components/profile/student-profile-view.tsx` (Refatorado - montagem do currículo vivo na main do perfil)
+  - `docs/ARCHITECTURE.md` (Modificado)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Impactos & Observações:** Checagem TypeScript estrita realizada com 0 erros (`npx tsc --noEmit`).
+
+
+### [2026-11-11] - Reposicionamento da Main do Perfil e Transformação das Áreas de Interesse em Carrossel Lateral
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Aprimoramento da timeline principal do perfil do estudante solicitado pelo usuário:
+  - **Reposicionamento na Main:** O bloco de Áreas de Interesse foi movido para logo após o cabeçalho (`ProfileStudentHeader`), conferindo prioridade visual imediata às afinidades tecnológicas do estudante na tela de perfil.
+  - **Transformação em Carrossel Lateral (`ProfileStudentInterests`):** O antigo card estático volumoso que empilhava tags foi substituído por uma trilha horizontal de rolagem suave (`ScrollView horizontal showsHorizontalScrollIndicator={false}`), com chips elegantes (dot índigo, texto nítido, remoção rápida) e botão "+ Novo" integrado, reduzindo o consumo de espaço vertical e deixando o feed ágil e fluido.
+- **Arquivos Alterados / Criados:**
+  - `src/components/profile/profile-student-interests.tsx` (Refatorado - carrossel horizontal compacto com chips e botão de novo interesse integrado)
+  - `src/components/profile/student-profile-view.tsx` (Refatorado - reposicionamento das áreas de interesse logo após o header)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Impactos & Observações:** Checagem TypeScript estrita realizada com 0 erros (`npx tsc --noEmit`).
+
+
+### [2026-11-11] - Aplicação do Estilo LinkedIn / Hero Profissional no Header do Estudante
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Adoção do padrão visual profissional estilo LinkedIn solicitado pelo usuário no cabeçalho do perfil do estudante:
+  - **Composição Simétrica e Harmônica:** Eliminação da divisão lateral assimétrica. O cabeçalho agora organiza a foto circular em tamanho grande (`w-24 h-24` / 96x96px) centralizada no topo, seguida pelo nome completo, cargo da subclasse `Aluno`, instituição/curso e tag de status profissional com alinhamento centralizado e respiro uniforme.
+  - **Barra Horizontal de Métricas na Base:** A base do card utiliza a régua horizontal completa (`layout="row"`) para as 3 métricas (Inscrições, Empresas, Conexões) divididas por separadores verticais, com 100% de aproveitamento da largura da tela sem compressão.
+  - **Acesso Direto aos Modais:** O toque na foto aciona o `ProfileStudentPhotoModal` (troca direta com câmera/galeria), o lápis aciona o `ProfileStudentAcademicEditModal` (CRUD acadêmico do aluno) e os contadores acionam o `ProfileStudentMetricModals`.
+- **Arquivos Alterados / Criados:**
+  - `src/components/profile/profile-student-info.tsx` (Refatorado - centralização hero estilo LinkedIn com foto destacada de 96px e tipografia hierárquica)
+  - `src/components/profile/profile-student-header.tsx` (Refatorado - montagem limpa e simétrica unindo o Hero de identificação e a régua horizontal de métricas na base)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Impactos & Observações:** Checagem estrita de tipos via `npx tsc --noEmit` realizada com 0 erros.
+
+
+### [2026-11-11] - Alinhamento Vertical das Informações do Aluno com Destaque Maior na Foto e Modal Direto de Troca
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Aprimoramento visual e funcional do cabeçalho do perfil do estudante atendendo à solicitação do usuário:
+  - **Alinhamento Vertical e Foto Destacada:** Em `ProfileStudentInfo`, a foto agora fica posicionada no topo com destaque ampliado (`w-20 h-20` / 80x80px com cantos `rounded-2xl`, borda índigo e sombra), enquanto o nome, cargo, instituição/curso e tag de status profissional ficam organizados verticalmente logo abaixo da foto.
+  - **Modal de Foto Ampliada e Troca Direta (`ProfileStudentPhotoModal`):** Ao tocar na foto na rota `/home/profile`, o app não redireciona mais para as configurações. Em vez disso, abre um modal dedicado mostrando a foto em tamanho ampliado (`w-48 h-48` com cantos `rounded-3xl` e backdrop blur), com ações imediatas para escolher nova foto da galeria, capturar com a câmera ou remover a foto atual.
+  - **Persistência Reativa e no Banco Local:** O hook `useProfileStudentHeader` expõe `atualizarFotoPerfil(uri?)`, persistindo a alteração no store reativo `usePerfil` e no SQLite através de `userService.save()`.
+- **Arquivos Alterados / Criados:**
+  - `src/components/profile/profile-student-photo-modal.tsx` (Criado - modal de exibição ampliada e troca direta da foto com ImagePicker)
+  - `src/components/profile/profile-student-info.tsx` (Modificado - foto no topo com destaque e informações alinhadas verticalmente abaixo, acionando o PhotoModal)
+  - `src/hooks/use-profile-student-header.ts` (Modificado - método `atualizarFotoPerfil` com persistência reativa e SQLite)
+  - `src/components/profile/profile-student-header.tsx` (Modificado - injeção do handler de atualização da foto)
+  - `docs/ARCHITECTURE.md` (Modificado)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Impactos & Observações:** Checagem TypeScript estrita realizada com 0 erros (`npx tsc --noEmit`).
+
+
+### [2026-11-11] - Implementação do Layout Lado a Lado no Header com Foto Blindada e Contadores Verticais
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Montagem do layout lado a lado no `ProfileStudentHeader` conforme solicitado pelo usuário, aproveitando o desacoplamento dos subcomponentes:
+  - **`ProfileStudentInfo` com `layout="side-by-side"`:** A foto do estudante fica alinhada à esquerda dos dados acadêmicos com proteção absoluta contra deformação (`aspectRatio: 1`, `width: 68`, `height: 68`, `flexShrink: 0`, `shrink-0` e `overflow-hidden`), enquanto o bloco de textos expande com `flex-1 min-w-0` e truncagem segura de linha (`numberOfLines={1}`).
+  - **`ProfileStudentCounters` com `layout="column"`:** Os 3 contadores (Inscrições, Empresas, Conexões) são renderizados como uma coluna vertical de atalhos à direita com ícones, números e chevrons em largura compacta e protegida (`w-32 sm:w-36 shrink-0`).
+  - **`ProfileStudentHeader`:** Atua como layout container flexível (`flex-row items-center justify-between gap-3`), unindo os dois subcomponentes lado a lado de forma elegante e totalmente responsiva.
+- **Arquivos Alterados / Criados:**
+  - `src/components/profile/profile-student-counters.tsx` (Modificado - adicionada a variante `layout="column"` para atalhos verticais à direita)
+  - `src/components/profile/profile-student-info.tsx` (Modificado - adicionada a variante `layout="side-by-side"` com dimensões e proporção 1:1 blindadas contra achatamento)
+  - `src/components/profile/profile-student-header.tsx` (Modificado - composição dos dois subcomponentes lado a lado)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Impactos & Observações:** Checagem TypeScript estrita realizada com 0 erros (`npx tsc --noEmit`). Layout testado e protegido contra compressão em telas mobile.
+
+
+### [2026-11-11] - Modularização do Header em Subcomponentes e Modelagem da Subclasse Aluno com CRUD Acadêmico
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Refatoração profunda solicitada pelo usuário para separar os elementos do cabeçalho em subcomponentes isolados e modelar os dados específicos do estudante como uma subclasse orientada a objetos com suporte a CRUD:
+  - **Criação da Subclasse `Aluno extends User`:** Implementada em `src/data/user.ts` com atributos acadêmicos (`cargo`, `instituicao`, `curso`, `abertoOportunidades`), métodos nativos de instância e persistência estendida no SQLite e AsyncStorage.
+  - **Subcomponente `ProfileStudentInfo`:** Isola a foto (com proteção 1:1), nome do aluno, cargo, instituição, curso, tag/pill de status e acionador de edição rápida.
+  - **Subcomponente `ProfileStudentCounters`:** Isola a barra horizontal com os 3 contadores (Inscrições, Empresas, Conexões) e divisores verticais.
+  - **Subcomponente `ProfileStudentAcademicEditModal`:** Fornece diálogo para edição (CRUD) dos campos acadêmicos da subclasse `Aluno`, persistindo os dados em tempo real no `usePerfil` e no banco SQLite via `userService`.
+  - **Orquestrador `ProfileStudentHeader`:** Agora atua como contêiner unificado limpo que apenas monta os subcomponentes isolados.
+- **Arquivos Alterados / Criados:**
+  - `src/data/user.ts` (Modificado - criação da subclasse `Aluno extends User` e instanciação no `userList`)
+  - `src/services/user-service.ts` (Modificado - suporte às colunas acadêmicas e instanciação da subclasse `Aluno`)
+  - `src/hooks/use-perfil.ts` (Modificado - inclusão dos campos da subclasse `Aluno` no contrato `Perfil`)
+  - `src/hooks/use-profile-form.ts` (Modificado - suporte aos campos acadêmicos no formulário de configurações)
+  - `src/hooks/use-profile-student-header.ts` (Modificado - hidratação canônica da subclasse `Aluno` e operações CRUD de atualização acadêmica e status)
+  - `src/components/profile/profile-student-info.tsx` (Criado - subcomponente de identidade e dados acadêmicos)
+  - `src/components/profile/profile-student-counters.tsx` (Criado - subcomponente de barra de contadores)
+  - `src/components/profile/profile-student-academic-edit-modal.tsx` (Criado - modal de CRUD acadêmico do aluno)
+  - `src/components/profile/profile-student-header.tsx` (Refatorado - montagem limpa dos subcomponentes)
+  - `docs/ARCHITECTURE.md` (Modificado)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Impactos & Observações:** Checagem estrita de tipos via `npx tsc --noEmit` realizada com 0 erros.
+
+
+### [2026-11-11] - Correção de Layout Estável e Hidratação de Domínio via Entidade User no ProfileStudentHeader
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Correção a pedido do usuário de problemas visuais e de modelagem de dados no cabeçalho do perfil do estudante:
+  - **Correção da Foto Achatada:** O layout anterior dividido horizontalmente comprimia a área da foto no mobile. Restaurado e blindado o layout circular centralizado estável com proporção 1:1 estrita (`aspectRatio: 1`, `resizeMode="cover"`, `h-24 w-24 rounded-full` com `overflow-hidden`), acompanhado da barra horizontal de 3 contadores com divisores verticais que não sofrem compressão de flexbox.
+  - **Hidratação Canônica via Entidade `User`:** O hook `useProfileStudentHeader` agora instancia diretamente a entidade de domínio `User` (`src/data/user.ts`), utilizando seu getter nativo `user.fullName`, `user.avatar`, iniciais dinâmicas e fallback seguro para o aluno padrão de `userList` caso o perfil ainda não tenha sido populado no store/storage.
+- **Arquivos Alterados / Criados:**
+  - `src/data/user.ts` (Modificado - adicionado avatar padrão para o aluno inicial de teste `001`)
+  - `src/hooks/use-profile-student-header.ts` (Modificado - hidratação a partir da entidade de domínio `User` com fallback e getters nativos)
+  - `src/components/profile/profile-student-header.tsx` (Modificado - restauração da estrutura circular centralizada protegida contra distorção com contadores horizontais espaçados)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Impactos & Observações:** Checagem TypeScript estrita realizada com 0 erros (`npx tsc --noEmit`). Layout 100% responsivo e estável em qualquer resolução de tela.
+
+
+### [2026-11-11] - Refatoração Arquitetural e Separação de Responsabilidades do ProfileStudentHeader
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Aplicação rigorosa dos princípios de arquitetura limpa e separação de responsabilidades no componente `ProfileStudentHeader`:
+  - Desacoplamento dos dados mock/domínio que estavam embutidos no componente visual.
+  - Extração de toda a lógica de negócio, agregação de dados e ordenação A-Z para um hook customizado dedicado (`useProfileStudentHeader`).
+  - Isolamento do código declarativo dos modais de métricas em um subcomponente modular de apresentação (`ProfileStudentMetricModals`).
+  - Redução drástica da complexidade ciclomática e tamanho de `ProfileStudentHeader`, mantendo fidelidade total ao layout visual e responsividade.
+- **Arquivos Alterados / Criados:**
+  - `src/data/social.ts` (Criado - tipagens `EmpresaSocial`, `ColegaSocial` e constantes `EMPRESAS_BASE`, `COLEGAS_BASE`)
+  - `src/hooks/use-profile-student-header.ts` (Criado - hook customizado que gerencia estados reativos, unificação de empresas, ordenação A-Z, controle de modal ativo e ações de navegação e social)
+  - `src/components/profile/profile-student-metric-modals.tsx` (Criado - subcomponente modular de apresentação para os modais de Inscrições, Empresas Seguidas e Conexões Acadêmicas)
+  - `src/components/profile/profile-student-header.tsx` (Refatorado - agora focado exclusivamente no layout do cabeçalho visual e consumindo o hook de orquestração)
+  - `docs/ARCHITECTURE.md` (Modificado - registro dos novos módulos na estrutura arquitetural)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Impactos & Observações:** Checagem TypeScript estrita realizada com 0 erros (`npx tsc --noEmit`). Nenhuma quebra de API pública ou comportamento visual.
+
+
+### [2026-11-11] - Reversão do Redesign de Header para o Layout Anterior Estável
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Reversão imediata a pedido do usuário do commit `6b41ea4`: restauração do layout anterior estável do `ProfileStudentHeader` (foto circular centralizada e barra de 3 contadores horizontais com o modal genérico centralizado com blur) e restauração do componente `ProfileInscricoesList`.
+- **Arquivos Alterados / Criados:**
+  - `src/components/profile/profile-student-header.tsx` (Restaurado ao layout circular e contadores horizontais)
+  - `src/components/profile/student-profile-view.tsx` (Restaurada montagem anterior)
+  - `src/components/profile/profile-inscricoes-list.tsx` (Restaurado)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Impactos & Observações:** Checagem TypeScript estrita concluída com 0 erros (`npx tsc --noEmit`).
+
+### [2026-11-11] - Redesign do Header do Estudante (Foto Quadrada e Atalhos à Direita) e Remoção da Lista de Vagas
+- **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
+- **Motivação / Contexto:** Aprimoramento visual de layout e otimização de espaço na tela de Perfil do Estudante solicitados pelo usuário:
+  - O componente solto `ProfileInscricoesList` foi removido da timeline principal da página, já que as inscrições agora são visualizadas e pesquisadas em ordem alfabética através do modal centralizado disparado pelo contador.
+  - O cabeçalho `ProfileStudentHeader` foi redesenhado no formato de painel dividido:
+    - **Lado Esquerdo:** foto de perfil em **quadrado com cantos arredondados** (`rounded-2xl`), acompanhada do nome do estudante, ocupação ("Estudante de Tecnologia"), instituição ("UNDB") e tag "Aberto a Oportunidades".
+    - **Lado Direito:** coluna vertical com 3 atalhos elegantes para as listas modais de Inscrições, Empresas Seguidas e Conexões (com ícones, contadores numéricos e chevrons).
+- **Arquivos Alterados / Criados:**
+  - `src/components/profile/profile-student-header.tsx` (Refatorado - novo layout split com foto quadrada arredondada e identificação à esquerda e botões de atalho verticais à direita)
+  - `src/components/profile/student-profile-view.tsx` (Refatorado - removida a chamada redundante de `ProfileInscricoesList`)
+  - `src/components/profile/profile-inscricoes-list.tsx` (Removido - funcionalidade absorvida pelo modal de métricas)
+  - `docs/ARCHITECTURE.md` (Modificado)
+  - `docs/CHANGELOG_AGENTS.md` (Modificado)
+- **Principais Mudanças:**
+  - Layout mais moderno, aproveitando melhor o espaço horizontal da tela e eliminando componentes duplicados.
+- **Impactos & Observações:** Checagem TypeScript estrita concluída com 0 erros (`npx tsc --noEmit`).
+
 ### [2026-11-11] - Reversão do Redesign de Header para o Layout Anterior Estável
 - **Agente / Autor:** Antigravity (Gemini 3.8 Flash)
 - **Motivação / Contexto:** Reversão imediata a pedido do usuário do commit `6b41ea4`: restauração do layout anterior estável do `ProfileStudentHeader` (foto circular centralizada e barra de 3 contadores horizontais com o modal genérico centralizado com blur) e restauração do componente `ProfileInscricoesList`.

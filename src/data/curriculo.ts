@@ -362,14 +362,14 @@ export const MOCK_CURRICULO_GERAL: CurriculoGeral = {
   contato: {
     nomeCompleto: 'John Doe',
     email: 'john.doe@aluno.undb.edu.br',
-    telefone: '(98) 98888-7777',
+    telefone: '(98) 98888-0001',
     cidade: 'São Luís',
     estado: 'MA',
     linkedin: 'https://linkedin.com/in/johndoe',
     github: 'https://github.com/johndoe',
   },
   resumoGeral:
-    'Estudante de Engenharia de Software na UNDB com forte interesse em desenvolvimento mobile (React Native/TypeScript) e interfaces acessíveis. Experiência prática em projetos acadêmicos e metodologias ágeis.',
+    'Estudante de Engenharia de Software na UNDB com forte interesse em desenvolvimento mobile (React Native/TypeScript) e interfaces acessíveis. Experiência prática na Empresa Júnior UNDB e em projetos acadêmicos com arquiteturas escaláveis.',
   formacoes: [
     {
       id: 'form_1',
@@ -377,9 +377,19 @@ export const MOCK_CURRICULO_GERAL: CurriculoGeral = {
       curso: 'Engenharia de Software',
       grau: 'Graduação',
       status: 'Em andamento',
-      dataInicio: '02/2023',
-      dataFim: '12/2026',
-      descricao: 'Ênfase em Arquitetura de Software, Algoritmos e Desenvolvimento Mobile.',
+      dataInicio: '2023',
+      dataFim: '2026',
+      descricao: 'Ênfase em Arquitetura de Software, Algoritmos, Computação em Nuvem e Desenvolvimento Mobile.',
+    },
+    {
+      id: 'form_2',
+      instituicao: 'Instituto Federal do Maranhão (IFMA)',
+      curso: 'Técnico em Informática para Internet',
+      grau: 'Ensino Técnico',
+      status: 'Concluído',
+      dataInicio: '2020',
+      dataFim: '2022',
+      descricao: 'Formação em lógica de programação, banco de dados relacionais, desenvolvimento web e redes.',
     },
   ],
   experiencias: [
@@ -388,23 +398,41 @@ export const MOCK_CURRICULO_GERAL: CurriculoGeral = {
       cargo: 'Desenvolvedor Frontend Trainee',
       empresa: 'Empresa Júnior UNDB',
       modalidade: 'Híbrido',
-      dataInicio: '08/2024',
+      dataInicio: '2024',
       atual: true,
-      descricao: 'Desenvolvimento de portais web e prototipagem de aplicações mobile.',
+      descricao: 'Desenvolvimento e manutenção de aplicações móveis e portais institucionais utilizando React Native e TailwindCSS.',
       atividades: [
-        'Criação de componentes reutilizáveis em React e TailwindCSS.',
-        'Integração com APIs RESTful e persistência local.',
+        'Criação de componentes reutilizáveis e acessíveis em React Native e NativeWind.',
+        'Integração de APIs RESTful e persistência resiliente em SQLite local.',
+        'Participação ativa em cerimônias ágeis com metodologia Scrum.',
       ],
-      competenciasUtilizadas: ['React', 'TypeScript', 'TailwindCSS', 'Git'],
+      competenciasUtilizadas: ['React Native', 'TypeScript', 'TailwindCSS', 'Git', 'SQLite'],
+    },
+    {
+      id: 'exp_2',
+      cargo: 'Monitor de Algoritmos e Programação',
+      empresa: 'Centro Universitário UNDB',
+      modalidade: 'Presencial',
+      dataInicio: '2023',
+      dataFim: '2024',
+      atual: false,
+      descricao: 'Suporte a alunos dos primeiros períodos em fundamentos de algoritmos, estrutura de dados e boas práticas de lógica.',
+      atividades: [
+        'Plantão de dúvidas e mentoria individualizada para novos estudantes de tecnologia.',
+        'Elaboração de exercícios práticos e materiais de apoio didático.',
+      ],
+      competenciasUtilizadas: ['Lógica de Programação', 'TypeScript', 'Estrutura de Dados'],
     },
   ],
   habilidades: [
-    { id: 'sk_1', nome: 'React Native', categoria: 'tecnica', nivel: 'intermediario' },
+    { id: 'sk_1', nome: 'React Native', categoria: 'tecnica', nivel: 'avancado' },
     { id: 'sk_2', nome: 'TypeScript', categoria: 'tecnica', nivel: 'avancado' },
-    { id: 'sk_3', nome: 'TailwindCSS / NativeWind', categoria: 'tecnica', nivel: 'avancado' },
-    { id: 'sk_4', nome: 'Git / GitHub', categoria: 'ferramenta', nivel: 'intermediario' },
-    { id: 'sk_5', nome: 'Trabalho em Equipe', categoria: 'comportamental' },
-    { id: 'sk_6', nome: 'Resolução de Problemas', categoria: 'comportamental' },
+    { id: 'sk_3', nome: 'Expo SDK 58', categoria: 'tecnica', nivel: 'avancado' },
+    { id: 'sk_4', nome: 'TailwindCSS / NativeWind', categoria: 'tecnica', nivel: 'avancado' },
+    { id: 'sk_5', nome: 'SQLite / Persistência Local', categoria: 'tecnica', nivel: 'intermediario' },
+    { id: 'sk_6', nome: 'Git & GitHub', categoria: 'ferramenta', nivel: 'avancado' },
+    { id: 'sk_7', nome: 'Trabalho em Equipe', categoria: 'comportamental' },
+    { id: 'sk_8', nome: 'Resolução de Problemas', categoria: 'comportamental' },
   ],
   idiomas: [
     { id: 'id_1', nome: 'Português', nivel: 'Nativo' },
@@ -414,7 +442,7 @@ export const MOCK_CURRICULO_GERAL: CurriculoGeral = {
     {
       id: 'proj_1',
       titulo: 'App PEIA - Plataforma de Estágios',
-      descricao: 'Aplicativo mobile com Expo SDK 58, SQLite local e OCR para leitura de currículos.',
+      descricao: 'Aplicativo mobile com Expo SDK 58, SQLite local e OCR para leitura e direcionamento inteligente de currículos.',
       link: 'https://github.com/exemplo/peia',
       tecnologias: ['React Native', 'Expo', 'TypeScript', 'SQLite', 'NativeWind'],
       data: '2025',
@@ -423,7 +451,7 @@ export const MOCK_CURRICULO_GERAL: CurriculoGeral = {
   certificacoes: [
     {
       id: 'cert_1',
-      titulo: 'Bootcamp Desenvolvimento Mobile com React Native',
+      titulo: 'Desenvolvimento Mobile com React Native & Expo',
       instituicao: 'Rocketseat',
       ano: '2024',
       cargaHoraria: 60,
@@ -432,4 +460,154 @@ export const MOCK_CURRICULO_GERAL: CurriculoGeral = {
   criadoEm: '2025-01-10T10:00:00.000Z',
   atualizadoEm: '2025-02-15T14:30:00.000Z',
 };
+
+/**
+ * Snapshots iniciais mockados de currículos direcionados para as candidaturas padrão de John Doe.
+ */
+export const MOCK_CURRICULOS_VAGAS: CurriculoVaga[] = [
+  {
+    id: 'currvaga_mock_001',
+    vagaId: '1',
+    usuarioId: '001',
+    tituloVaga: 'Estágio em Desenvolvimento Mobile',
+    empresaVaga: 'Nubix',
+    resumoCustomizado:
+      'Olá equipe da Nubix! Como estudante de Engenharia de Software na UNDB e desenvolvedor trainee com foco em React Native e TypeScript, tenho grande entusiasmo em colaborar na criação de experiências móveis fluidas e modernas. Possuo vivência em desenvolvimento ágil, gerenciamento de estado e persistência local resiliente em SQLite, alinhando-se diretamente às demandas de produto da Nubix.',
+    cartaApresentacao:
+      'Estou à disposição para entrevistas e desafios técnicos, motivado a somar com o time de engenharia da Nubix.',
+    formacoes: [
+      {
+        id: 'form_1',
+        instituicao: 'Centro Universitário UNDB',
+        curso: 'Engenharia de Software',
+        grau: 'Graduação',
+        status: 'Em andamento',
+        dataInicio: '2023',
+        dataFim: '2026',
+        descricao: 'Ênfase em Arquitetura de Software, Algoritmos e Desenvolvimento Mobile.',
+      },
+    ],
+    experiencias: [
+      {
+        id: 'exp_1',
+        cargo: 'Desenvolvedor Frontend Trainee',
+        empresa: 'Empresa Júnior UNDB',
+        modalidade: 'Híbrido',
+        dataInicio: '2024',
+        atual: true,
+        descricao: 'Desenvolvimento e manutenção de aplicações móveis utilizando React Native, Expo e TailwindCSS.',
+        atividades: [
+          'Criação de componentes reutilizáveis e acessíveis em React Native e NativeWind.',
+          'Integração de APIs RESTful e persistência resiliente em SQLite local.',
+          'Participação em sprints Scrum com entrega contínua.',
+        ],
+        competenciasUtilizadas: ['React Native', 'TypeScript', 'TailwindCSS', 'Git', 'SQLite'],
+      },
+    ],
+    habilidadesDestacadas: [
+      { id: 'sk_1', nome: 'React Native', categoria: 'tecnica', nivel: 'avancado' },
+      { id: 'sk_2', nome: 'TypeScript', categoria: 'tecnica', nivel: 'avancado' },
+      { id: 'sk_3', nome: 'Expo SDK 58', categoria: 'tecnica', nivel: 'avancado' },
+      { id: 'sk_4', nome: 'TailwindCSS / NativeWind', categoria: 'tecnica', nivel: 'avancado' },
+      { id: 'sk_5', nome: 'SQLite / Persistência Local', categoria: 'tecnica', nivel: 'intermediario' },
+      { id: 'sk_6', nome: 'Git & GitHub', categoria: 'ferramenta', nivel: 'avancado' },
+    ],
+    idiomas: [
+      { id: 'id_1', nome: 'Português', nivel: 'Nativo' },
+      { id: 'id_2', nome: 'Inglês', nivel: 'Intermediário' },
+    ],
+    projetos: [
+      {
+        id: 'proj_1',
+        titulo: 'App PEIA - Plataforma de Estágios',
+        descricao: 'Aplicativo mobile com Expo SDK 58, SQLite local e OCR para leitura e direcionamento inteligente de currículos.',
+        link: 'https://github.com/exemplo/peia',
+        tecnologias: ['React Native', 'Expo', 'TypeScript', 'SQLite', 'NativeWind'],
+        data: '2025',
+      },
+    ],
+    certificacoes: [
+      {
+        id: 'cert_1',
+        titulo: 'Desenvolvimento Mobile com React Native & Expo',
+        instituicao: 'Rocketseat',
+        ano: '2024',
+        cargaHoraria: 60,
+      },
+    ],
+    compatibilidadeEstimada: 96,
+    dataEnvio: '2025-02-10T14:30:00.000Z',
+  },
+  {
+    id: 'currvaga_mock_002',
+    vagaId: '2',
+    usuarioId: '001',
+    tituloVaga: 'Estágio em Dados',
+    empresaVaga: 'Dataly',
+    resumoCustomizado:
+      'Prezado time da Dataly! Tenho grande interesse na vaga de Estágio em Dados. Durante minha graduação em Engenharia de Software e nas atividades na Empresa Júnior, aprofundei conhecimentos em modelagem de dados relacionais, banco SQLite, pipelines de dados locais e raciocínio analítico estruturado. Busco contribuir na construção de visualizações claras e apoio nas tomadas de decisão da Dataly.',
+    cartaApresentacao:
+      'Comprometido com a qualidade e organização dos dados, pronto para colaborar remotamente com o time.',
+    formacoes: [
+      {
+        id: 'form_1',
+        instituicao: 'Centro Universitário UNDB',
+        curso: 'Engenharia de Software',
+        grau: 'Graduação',
+        status: 'Em andamento',
+        dataInicio: '2023',
+        dataFim: '2026',
+        descricao: 'Formação com ênfase em Banco de Dados, Algoritmos e Métricas de Software.',
+      },
+      {
+        id: 'form_2',
+        instituicao: 'Instituto Federal do Maranhão (IFMA)',
+        curso: 'Técnico em Informática para Internet',
+        grau: 'Ensino Técnico',
+        status: 'Concluído',
+        dataInicio: '2020',
+        dataFim: '2022',
+        descricao: 'Bancos de dados relacionais (SQL), modelagem lógica e lógica de programação.',
+      },
+    ],
+    experiencias: [
+      {
+        id: 'exp_2',
+        cargo: 'Monitor de Algoritmos e Programação',
+        empresa: 'Centro Universitário UNDB',
+        modalidade: 'Presencial',
+        dataInicio: '2023',
+        dataFim: '2024',
+        atual: false,
+        descricao: 'Mentoria e suporte técnico em estruturas de dados, lógica analítica e resolução de problemas algorítmicos.',
+        competenciasUtilizadas: ['Lógica de Programação', 'TypeScript', 'Estrutura de Dados'],
+      },
+    ],
+    habilidadesDestacadas: [
+      { id: 'sk_5', nome: 'SQLite / Persistência Local', categoria: 'tecnica', nivel: 'intermediario' },
+      { id: 'sk_2', nome: 'TypeScript', categoria: 'tecnica', nivel: 'avancado' },
+      { id: 'sk_8', nome: 'Resolução de Problemas', categoria: 'comportamental' },
+      { id: 'sk_7', nome: 'Trabalho em Equipe', categoria: 'comportamental' },
+      { id: 'sk_6', nome: 'Git & GitHub', categoria: 'ferramenta', nivel: 'avancado' },
+    ],
+    idiomas: [
+      { id: 'id_1', nome: 'Português', nivel: 'Nativo' },
+      { id: 'id_2', nome: 'Inglês', nivel: 'Intermediário' },
+    ],
+    projetos: [
+      {
+        id: 'proj_1',
+        titulo: 'App PEIA - Plataforma de Estágios',
+        descricao: 'Persistência resiliente de dados com tabelas SQLite e sincronização com AsyncStorage.',
+        link: 'https://github.com/exemplo/peia',
+        tecnologias: ['SQLite', 'TypeScript'],
+        data: '2025',
+      },
+    ],
+    certificacoes: [],
+    compatibilidadeEstimada: 91,
+    dataEnvio: '2025-02-12T09:15:00.000Z',
+  },
+];
+
 
